@@ -1,0 +1,151 @@
+/* ==========================================================================
+   1. ESCUDO ANTI-ESCRITORIO: OCULTAR TODO LO MÓVIL (Pantallas > 768px)
+   ========================================================================== */
+@media (min-width: 769px) {
+    /* Destruye el botón "FILTROS" de la barra de géneros en PC */
+    #mmc-open-mobile-filters,
+    .mmc-mobile-trigger {
+        display: none !important;
+    }
+
+    /* Destruye el panel lateral y el fondo negro que se cuelan al final de la página */
+    #mmc-mobile-side-panel,
+    .mmc-side-panel,
+    #mmc-panel-overlay,
+    .mmc-mobile-trigger-wrapper {
+        display: none !important;
+    }
+}
+
+/* ==========================================================================
+   2. ESTILOS SOLO PARA MÓVIL (Pantallas <= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+    
+    /* ACELERACIÓN POR GPU (Adiós al lag) */
+    .mmc-side-panel, 
+    .mobile-acc-content {
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        perspective: 1000px;
+        transform: translateZ(0); 
+    }
+
+    /* A) BOTÓN FILTROS INTEGRADO (Al lado de Niños) */
+    .mmc-premium-filters-container .mmc-gender-tabs .mmc-mobile-trigger {
+        display: inline-flex !important;
+        width: auto !important;
+        max-width: fit-content !important;
+        height: 34px !important; 
+        padding: 0 15px !important;
+        flex: 0 0 auto !important;
+        background: #0B2572 !important;
+        color: #fff !important;
+        border: 1px solid #0B2572 !important;
+        border-radius: 4px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        font-weight: 700 !important;
+        font-size: 11px !important;
+        text-transform: uppercase;
+        cursor: pointer !important;
+    }
+
+    .mmc-premium-filters-container .mmc-gender-tabs .mmc-mobile-trigger .gender-icon {
+        width: 16px !important;
+        height: 14px !important;
+        filter: brightness(0) invert(1) !important;
+        object-fit: contain !important;
+    }
+
+    /* B) PANEL LATERAL */
+    .mmc-side-panel {
+        display: block !important; /* Fuerza a que exista en móvil */
+        position: fixed; top: 0; right: -100%; width: 85%; height: 100%;
+        background: #fff; z-index: 9999; 
+        transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        padding: 0 !important;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.1); overflow-y: auto;
+    }
+    .mmc-side-panel.open { right: 0; }
+    
+    #mmc-panel-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); z-index: 9998; display: none;
+    }
+
+    /* C) CABECERA (Con la X a la Izquierda) */
+    .mmc-panel-header {
+        display: flex !important; 
+        justify-content: flex-start !important; /* Alinea a la izquierda */
+        align-items: center !important; 
+        padding: 15px 20px !important;
+        border-bottom: 1px solid #eee !important; 
+        background: #fff !important;
+        gap: 20px !important; /* Separación entre X y el Título */
+    }
+
+    .mmc-close-btn {
+        order: 1 !important; /* Forza la X a ser el primer elemento */
+        background: transparent !important; border: none !important;
+        box-shadow: none !important; outline: none !important;
+        font-size: 36px !important; color: #999 !important;
+        cursor: pointer !important; line-height: 1 !important;
+        padding: 0 !important; margin: 0 !important;
+        padding-bottom: 5px !important;
+    }
+
+    .mmc-panel-title {
+        order: 2 !important; /* Forza el Título a ser el segundo elemento */
+        font-size: 18px !important; font-weight: 800 !important;
+        color: #333 !important; margin: 0 !important; text-transform: uppercase;
+    }
+
+    /* D) ACORDEONES Y LIMPIEZA */
+    .mmc-panel-content { padding: 10px 20px !important; }
+
+    .mobile-acc-item { border-bottom: 1px solid #f0f0f0; }
+    
+    .mobile-acc-header { 
+        padding: 18px 0 !important; display: flex !important; 
+        justify-content: space-between !important; align-items: center !important;
+        font-weight: 700 !important; cursor: pointer !important; 
+        text-transform: uppercase !important; font-size: 13px !important; color: #333 !important;
+    }
+
+    .mobile-acc-content h4, .mobile-acc-content h5, .mobile-acc-content .mmc-section-title {
+        display: none !important; height: 0 !important; margin: 0 !important;
+    }
+
+    /* CERO LAG AL CERRAR */
+    .mobile-acc-content { 
+        display: none; 
+        padding: 0 !important; /* Vital para que cierre fluido */
+        overflow: hidden; 
+    }
+
+    /* E) GRID Y SLIDERS (Con márgenes seguros adentro) */
+    .mobile-acc-content .shapes-grid {
+        display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important;
+        contain: content; 
+        margin-top: 10px !important; 
+        margin-bottom: 25px !important; 
+    }
+    
+    .mobile-acc-content .shape-box { padding: 10px; font-size: 11px; }
+
+    .mobile-acc-content .mmc-technical-sliders-grid {
+        display: flex !important; flex-direction: column !important; gap: 20px !important;
+        margin-top: 10px !important; 
+        margin-bottom: 25px !important;
+    }
+    
+    .mobile-acc-content .mmc-slider-container { width: 100% !important; padding: 15px 10px; }
+
+    /* F) FOOTER Y OCULTAMIENTO DE ESCRITORIO EN MÓVIL */
+    .mmc-panel-footer { margin-top: 30px; padding: 20px; padding-bottom: 60px; }
+    
+    /* Oculta la barra de pills original de escritorio cuando estamos en celular */
+    .mmc-filter-bar { display: none !important; }
+}

@@ -1,0 +1,316 @@
+/*
+ Theme Name: Tema Hijo
+ Template: kadence
+ Version: 1.4.4
+ Text Domain: tema-hijo
+*/
+
+
+
+
+.sp-summary-custom{display:grid;gap:10px}
+.sp-title{margin:0 0 6px;font-size:28px;line-height:1.2}
+.sp-brand{opacity:.9}
+.sp-pricebox{display:grid;gap:4px;margin:10px 0 12px}
+.sp-pricebox__final{display:flex;align-items:baseline;gap:10px}
+.sp-price{font-size:24px;font-weight:700}
+.sp-off{background:#111;color:#fff;border-radius:999px;padding:2px 8px;font-size:12px}
+.sp-pricebox__regular{font-size:14px;opacity:.8}
+.sp-sku{font-size:14px}
+.sp-atc{margin-top:10px}
+/* Acordeón (en la columna del precio / summary) */
+.single-product div.product .summary .sp-accordion--in-summary details{
+  border:1px solid #dcdfe3;
+  border-radius:12px;
+  background:#f8f9fb;
+  margin:12px 0;
+  overflow:hidden;
+  transition:border-color .2s ease, background .2s ease, box-shadow .2s ease;
+  box-shadow:0 0 0 rgba(0,0,0,0);
+}
+.single-product div.product .summary .sp-accordion--in-summary details:hover{
+  border-color:#bfc5cc;
+  background:#f6f7f9;
+  box-shadow:0 2px 10px rgba(0,0,0,.04);
+}
+
+/* Encabezado */
+.single-product div.product .summary .sp-accordion--in-summary summary{
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 16px;
+  font-weight:700;
+  font-size:16.5px;  /* un toque más grande */
+  line-height:1.25;
+  list-style:none;
+}
+.single-product div.product .summary .sp-accordion--in-summary summary::-webkit-details-marker{ display:none; }
+
+/* Flecha */
+.single-product div.product .summary .sp-accordion--in-summary summary::after{
+  content:"";
+  width:10px;height:10px;
+  border-right:2px solid #555;
+  border-bottom:2px solid #555;
+  transform:rotate(45deg);
+  transition:transform .2s ease, opacity .2s ease;
+  opacity:.9;
+}
+.single-product div.product .summary .sp-accordion--in-summary details[open] summary::after{
+  transform:rotate(-135deg);
+}
+
+/* Contenido */
+.single-product div.product .summary .sp-accordion--in-summary .sp-acc__content{
+  padding:14px 16px 16px;
+  font-size:15.5px;   /* un toque más grande */
+  line-height:1.55;
+}
+.single-product div.product .summary .sp-accordion--in-summary .sp-acc__content ul{ margin:0 0 0 18px; }
+.single-product div.product .summary .sp-accordion--in-summary .sp-acc__content li{ margin:4px 0; }
+
+/* Separación respecto al botón */
+.single-product .summary .sp-accordion--in-summary{ margin-top:12px; }
+
+/* (opcional) afina tipografías del summary */
+.single-product .summary .product_title{ font-size:28px; line-height:1.2; margin-bottom:8px; }
+.single-product .summary .price{ font-size:20px; }
+
+
+/*sssssssssssssssssssssssss*/
+.sp-lens-measures-wrap {
+  margin: 15px 0;
+	padding: 0;  
+}
+
+.sp-lens-measures {
+  display: flex;
+  flex-wrap: nowrap;           /* nunca saltar de línea */
+  justify-content: flex-start; /* que se distribuyan */
+  align-items: flex-start;
+  gap: 5px;                  /* gap relativo al ancho de pantalla */
+
+}
+
+.sp-lens-measures__item {
+  text-align: center;
+  flex: 1;                     /* que todos ocupen espacio igual */
+  min-width: 60px;             /* límite mínimo para no deformarse */
+}
+
+.sp-lens-measures__icon {
+  width: clamp(55px, 8vw, 64px);   /* escala con pantalla */
+  height: clamp(55px, 8vw, 64px);
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+.sp-lens-measures__icon img {
+  max-width: 90%;
+  height: auto;
+  display: block;
+}
+
+.sp-lens-measures__label {
+  font-weight: 600;
+  line-height: 1.1;
+  font-size: clamp(12px, 2vw, 14px); /* tipografía también se adapta */
+}
+
+.sp-lens-measures__value {
+  font-size: clamp(11px, 1.8vw, 13px);
+  color: #333;
+}
+
+
+
+
+
+/* Fallback "sticky" por JS */
+@media (min-width: 992px){
+  .sp-sticky-enabled .sp-sticky-target{
+    position: relative;
+    will-change: transform;
+    transform: translateY(0); /* JS la irá actualizando */
+  }
+  /* por si algún contenedor estaba cortando */
+  .single-product .product, 
+  .single-product .summary, 
+  .single-product .entry-summary{ overflow: visible !important; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================================
+   ESTILOS: CUPÓN, BENEFICIOS Y BOTONES
+   ======================================================== */
+
+/* Beneficios y Cupón */
+.mmc-caja-cupon {
+    background-color: #f2f9f4;
+    border: 1px solid #d4edda;
+    border-radius: 6px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #155724;
+    margin-bottom: 15px;
+}
+.mmc-caja-cupon span { font-weight: bold; padding: 2px 6px; border: 1px dashed #155724; border-radius: 4px; }
+
+.mmc-lista-beneficios {
+    list-style: none; padding: 0; margin: 0 0 25px 0; font-size: 14px; color: #555;
+}
+.mmc-lista-beneficios li { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+
+/* Botones Dinámicos */
+.mmc-contenedor-botones-dinamicos { margin-top: 20px; width: 100%; }
+
+.mmc-btn-azul-solido {
+    background-color: #1a6bcf !important; 
+    color: #fff !important;
+    width: 100%; padding: 15px; font-size: 16px; font-weight: 700;
+    border: none; border-radius: 6px; cursor: pointer; margin-bottom: 15px;
+    transition: background 0.3s; text-align: center;
+}
+.mmc-btn-azul-solido:hover { background-color: #1052a3 !important; }
+
+.mmc-btn-azul-outline {
+    background-color: #fff !important;
+    color: #1a6bcf !important;
+    width: 100%; padding: 15px; font-size: 16px; font-weight: 700;
+    border: 2px solid #1a6bcf !important; border-radius: 6px; cursor: pointer;
+    transition: all 0.3s; text-align: center;
+}
+.mmc-btn-azul-outline:hover { background-color: #f0f6ff !important; }
+
+
+
+/*====================================================================================================================================================================*/
+
+
+/* ====== Estilos de la sección Split (Texto + Imagen) ====== */
+.mmc-seccion-split {
+    margin: 40px 0 60px 0; /* Espacio arriba y abajo para respirar */
+    padding-top: 40px;
+    border-top: 1px solid #eaeaea; /* Línea separadora sutil */
+}
+
+.mmc-split-titulo {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.mmc-split-columnas {
+    display: flex;
+    align-items: center; /* Centra el texto verticalmente con la imagen */
+    gap: 40px; /* Separación entre el texto y la foto */
+}
+
+.mmc-split-texto {
+    flex: 1; /* Toma la mitad del espacio */
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.mmc-split-texto p {
+    margin-bottom: 15px;
+}
+
+.mmc-split-lista {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.mmc-split-lista li {
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 8px;
+}
+
+.mmc-split-imagen {
+    flex: 1; /* Toma la otra mitad del espacio */
+}
+
+.mmc-split-imagen img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px; /* Bordes redondeados elegantes */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* Sombra súper suave */
+}
+
+/* Modo Celular: Apilamos uno sobre otro */
+@media (max-width: 768px) {
+    .mmc-split-columnas {
+        flex-direction: column;
+    }
+    
+    .mmc-split-titulo {
+        font-size: 24px;
+        text-align: left;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,122 @@
+/* ==========================================================================
+   CARRUSEL HOME (AISLADO) - SWIPER
+   ========================================================================== */
+.mmc-home-carousel { 
+    position: relative; 
+    overflow: hidden; 
+    padding: 10px 0; 
+    margin: 20px 0; 
+    width: 100%; /* Límite de pared a pared */
+    min-width: 0; /* 🔥 EL ANTÍDOTO MÁGICO CONTRA EL INFINITO 🔥 */
+    box-sizing: border-box;
+}
+
+.mmc-home-carousel .swiper-slide { 
+    height: auto !important; 
+    display: flex; 
+    align-items: stretch; 
+    box-sizing: border-box;
+}
+
+/* Tarjeta */
+.mmc-home-card {
+    display: flex; flex-direction: column; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;
+    width: 100%; /* Fuerza a la tarjeta a respetar el ancho del slide */
+    box-sizing: border-box;
+    transition: box-shadow .3s ease, border-color .3s ease;
+}
+.mmc-home-card:hover { border-color: #111; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+
+/* Imagen */
+.mmc-home-img-wrapper {
+    width: 100%; position: relative; display: block; overflow: hidden;
+    border-radius: 6px; background-color: #f7f8fa; margin-bottom: 12px;
+    aspect-ratio: 500 / 370; /* Mantiene la proporción horizontal de tus lentes */
+    box-sizing: border-box;
+}
+.mmc-home-img-wrapper img {
+    position: absolute !important; top: 0; left: 0; width: 100% !important; height: 100% !important;
+    object-fit: contain !important; transition: opacity 0.4s ease !important; margin: 0;
+}
+.mmc-home-img-wrapper .hover-image { opacity: 0; z-index: 2; }
+.mmc-home-card:hover .mmc-home-img-wrapper .hover-image { opacity: 1; }
+.mmc-home-card:hover .mmc-home-img-wrapper > img:not(.hover-image) { opacity: 0; }
+
+/* Info Box */
+.mmc-home-info-box { display: flex; flex-direction: column; flex-grow: 1; }
+
+/* ==========================================================================
+   JERARQUÍA VISUAL: CATEGORÍA, TÍTULO Y PRECIO
+   ========================================================================== */
+
+/* Categoría (Clickeable, plomito, sin raya) */
+.mmc-home-cat { font-size: 10px; text-transform: uppercase; margin-bottom: 6px; display: block; }
+.mmc-home-cat a { color: #999 !important; text-decoration: none !important; transition: color 0.2s ease; }
+.mmc-home-cat a:hover { color: #111 !important; }
+
+/* Fila de Título y Precio (La magia del boceto) */
+.mmc-home-title-price-row { 
+    display: flex; justify-content: space-between; align-items: flex-start; 
+    gap: 10px; margin-bottom: 10px; 
+}
+
+/* Título (17px y con puntos suspensivos) */
+.mmc-home-title-link { flex: 1; min-width: 0; text-decoration: none !important; }
+.mmc-home-title { 
+    font-size: 17px; font-weight: 700; color: #111; margin: 0; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+}
+
+/* Precios (17px para hacer juego con el título) */
+.mmc-home-price { flex-shrink: 0; font-size: 17px; font-weight: 700; color: #e63946; text-align: right; }
+.mmc-home-price del { color: #999; font-weight: 400; font-size: 14px; margin-right: 4px; }
+.mmc-home-price ins { text-decoration: none; }
+
+/* ==========================================================================
+   ETIQUETA DE OFERTA Y BOTÓN
+   ========================================================================== */
+
+/* Etiqueta Oferta */
+.mmc-home-sale-badge { 
+    position: absolute; top: 12px; right: 12px; background: #e63946; color: #fff; 
+    font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 4px; z-index: 10; 
+}
+
+/* Botón de compra */
+.mmc-home-buy-btn {
+    display: block; width: 100%; text-align: center; margin-top: auto; 
+    background: #2b6282; color: #fff; font-size: 14px; font-weight: 600; 
+    padding: 10px 0; border-radius: 4px; text-decoration: none !important; transition: background 0.2s;
+}
+.mmc-home-buy-btn:hover { background: #1f4a63; color: #fff; }
+
+/* ==========================================================================
+   FLECHAS SWIPER Y FIX DE CARGA
+   ========================================================================== */
+
+/* Flechas */
+.mmc-home-carousel .mmc-home-swiper-btn {
+    background-color: #ffffff !important; border: 1px solid #e2e8f0; width: 40px !important; height: 40px !important;
+    border-radius: 50% !important; box-shadow: 0 2px 8px rgba(0,0,0,0.08); z-index: 10;
+    display: flex; align-items: center; justify-content: center; position: absolute; top: 50%; transform: translateY(-50%); cursor: pointer;
+}
+.mmc-home-carousel .mmc-home-swiper-btn::after { font-size: 14px !important; color: #333; font-weight: 700; }
+.mmc-home-carousel .swiper-button-prev { left: 0px; }
+.mmc-home-carousel .swiper-button-next { right: 0px; }
+@media (max-width: 768px) { .mmc-home-carousel .mmc-home-swiper-btn { display: none !important; } }
+
+/* FOUC (Evitar saltos antes de cargar) */
+.mmc-home-carousel:not(.swiper-initialized) { display: flex; overflow: hidden; gap: 15px; flex-wrap: nowrap; width: 100%; box-sizing: border-box; }
+.mmc-home-carousel:not(.swiper-initialized) .swiper-slide { width: 25% !important; flex: 0 0 25%; box-sizing: border-box; }
+@media (max-width: 768px) { .mmc-home-carousel:not(.swiper-initialized) .swiper-slide { width: 45% !important; flex: 0 0 45%; } }
+
+/* ==========================================================================
+   ESPACIADO EN MÓVILES (BORDES LATERALES)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .mmc-home-carousel { 
+        padding-left: 21px !important; 
+        padding-right: 21px !important; 
+    }
+}

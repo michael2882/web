@@ -1,0 +1,185 @@
+/* ==========================================================================
+   ESTILOS DEL FOOTER LEÓPTICA
+   ========================================================================== */
+.mmc-site-footer {
+    background: transparent !important; 
+    padding: 0 20px !important;
+    margin: 0 !important;
+    font-family: inherit;
+    text-align: left !important;
+}
+
+.mmc-footer-grid-5 {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 25px;
+}
+
+.mmc-footer-col { margin-top: 0px; }
+
+/* Ocultar flecha de acordeón en computadora */
+.mmc-arrow { display: none; }
+
+/* Títulos y Contenido */
+.mmc-footer-title {
+    font-size: 19px !important;
+    font-weight: 700 !important;
+    margin-bottom: 15px !important;
+    text-transform: uppercase;
+    text-align: left !important;
+}
+
+.mmc-col-content ul {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.mmc-col-content ul li { margin-bottom: 5px !important; }
+
+.mmc-col-content a {
+    text-decoration: none !important;
+    font-size: 14px !important; /* En escritorio se mantiene normal */
+    line-height: 1.2 !important;
+    transition: 0.2s;
+    display: inline-block;
+}
+
+.mmc-libro-inline {
+    display: block;
+    margin-top: 15px; 
+    transition: opacity 0.3s;
+    text-align: left !important;
+}
+
+.mmc-libro-inline img {
+    max-width: 140px !important; /* Aquí ajustas el tamaño del libro */
+    height: auto;
+    display: block;
+    margin: 0 !important;
+}
+
+/* =========================================
+   COLUMNA 5 (LOGO, INFO Y REDES)
+========================================= */
+.mmc-footer-col-contact {
+    text-align: left !important;
+    margin-top: 0 !important; 
+}
+
+.mmc-footer-main-logo {
+    max-width: 160px !important;
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+    margin-bottom: 15px !important;
+    display: block !important;
+}
+
+.mmc-contact-info {
+    margin: 0 0 6px 0 !important;
+    font-size: 14px;
+    line-height: 1.3 !important;
+}
+
+.mmc-contact-info a { text-decoration: none; transition: 0.2s; }
+
+.mmc-atencion-block { margin-top: 0 !important; margin-bottom: 15px !important; }
+
+.mmc-social-title {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    text-align: left !important;
+}
+
+.mmc-atencion-block p { font-size: 13px; line-height: 1.3 !important; margin: 0 !important; }
+
+.mmc-social-icons {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+    justify-content: flex-start !important;
+}
+
+.mmc-social-link { display: block; transition: transform 0.3s ease, opacity 0.3s ease; }
+.mmc-social-link:hover { transform: translateY(-3px); opacity: 0.8; }
+.mmc-social-link img { width: 25px; height: 25px; object-fit: contain; display: block; }
+
+/* =========================================
+   COLORES
+========================================= */
+.mmc-footer-theme-negro .mmc-footer-title,
+.mmc-footer-theme-negro .mmc-social-title { color: #0B2572 !important; } 
+.mmc-footer-theme-negro .mmc-col-content a,
+.mmc-footer-theme-negro .mmc-contact-info a,
+.mmc-footer-theme-negro .mmc-atencion-block p { color: #444444 !important; }
+.mmc-footer-theme-negro .mmc-col-content a:hover,
+.mmc-footer-theme-negro .mmc-contact-info a:hover { color: #0B2572 !important; }
+
+.mmc-footer-theme-blanco .mmc-footer-title,
+.mmc-footer-theme-blanco .mmc-social-title { color: #ffffff !important; }
+.mmc-footer-theme-blanco .mmc-col-content a,
+.mmc-footer-theme-blanco .mmc-contact-info a,
+.mmc-footer-theme-blanco .mmc-atencion-block p { color: #e0e0e0 !important; }
+.mmc-footer-theme-blanco .mmc-col-content a:hover,
+.mmc-footer-theme-blanco .mmc-contact-info a:hover { color: #ffffff !important; text-decoration: underline; }
+
+/* =========================================
+   RESPONSIVE (¡AQUÍ SUCEDE LA MAGIA DEL ACORDEÓN!)
+========================================= */
+@media (max-width: 1024px) {
+    .mmc-footer-grid-5 { grid-template-columns: repeat(3, 1fr); gap: 40px; }
+}
+
+@media (max-width: 768px) {
+    .mmc-footer-grid-5 { grid-template-columns: 1fr; gap: 0; text-align: left; }
+    .mmc-footer-col { margin-top: 0 !important; } 
+    
+    /* Aumento de tamaño de letra en celular */
+    .mmc-footer-title { font-size: 17px !important; }
+    .mmc-col-content a, .mmc-contact-info, .mmc-atencion-block p { font-size: 15px !important; }
+    
+    /* Diseño del Acordeón Móvil */
+    .mmc-accordion-col .mmc-accordion-trigger {
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(150, 150, 150, 0.2); /* Línea divisoria sutil */
+        padding-top: 15px;
+        padding-bottom: 15px;
+        margin-bottom: 0 !important;
+    }
+
+    /* Ocultamos el contenido de las columnas por defecto */
+    .mmc-accordion-col .mmc-accordion-content {
+        display: none; 
+        padding-top: 15px;
+        padding-bottom: 20px;
+    }
+
+    /* Mostramos y animamos la flecha */
+    .mmc-arrow {
+        display: inline-block;
+        font-size: 12px;
+        transition: transform 0.3s ease;
+        color: #999;
+    }
+
+    .mmc-accordion-trigger.active .mmc-arrow {
+        transform: rotate(180deg);
+        color: #0B2572; /* La flecha se pinta de azul al abrir */
+    }
+
+    /* Ajustes extra para el logo en celular */
+    .mmc-footer-col-contact { padding-top: 25px; }
+    .mmc-footer-main-logo { max-width: 130px !important; margin-left: 0; }
+    .mmc-libro-inline img { margin-left: 0; }
+    .mmc-social-icons { justify-content: flex-start; }
+}

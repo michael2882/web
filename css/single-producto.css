@@ -1,0 +1,1464 @@
+
+
+    /* ========================================================
+   1. SELECTOR DE COLOR Y OCULTAMIENTO NATIVO
+   ======================================================== */
+
+.mmc-product-top-container {
+    gap: 10px !important;
+}  
+.mmc-color-selector-wrapper { margin-bottom: 25px; }
+.mmc-color-label { font-size: 15px; font-weight: 600; color: #111; margin-bottom: 10px; }
+.mmc-color-name { font-weight: 400; color: #555; margin-left: 5px; }
+
+.mmc-swatches-individuales { display: flex; gap: 10px; flex-wrap: wrap; }
+.mmc-swatch-punto {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #ddd; cursor: pointer; transition: all 0.2s ease;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.1); font-size: 12px; font-weight: bold; color: #555;
+}
+.mmc-swatch-punto.activo, .mmc-swatch-punto:hover { transform: scale(1.1); border-color: #111; }
+
+/* Ocultamos basura de WooCommerce (título de color viejo, cantidad, limpiar) */
+.woocommerce div.product form.cart .variations { margin-bottom: 0 !important; }
+.woocommerce div.product form.cart .reset_variations { display: none !important; }
+.woocommerce div.product form.cart .quantity { display: none !important; }
+.woocommerce div.product form.cart .variations th,
+.woocommerce div.product form.cart .variations td.label { display: none !important; }
+
+
+/* ========================================================
+   2. BOTONES DINÁMICOS (Forzados al 100% de ancho)
+   ======================================================== */
+.mmc-contenedor-botones-dinamicos { width: 100%; margin-top: 0px !important; }
+
+/* Obligamos al formulario de Woo a apilar todo en columna para que nada se aplaste */
+.woocommerce div.product form.cart {
+    display: flex !important;
+    flex-direction: column !important;
+    margin-bottom: 0 !important;
+}
+
+/* Botón Nativo: Añadir al carrito (Centrado absoluto) */
+.woocommerce div.product form.cart .single_add_to_cart_button { 
+    background-color: #1a6bcf !important; color: #fff !important; 
+    width: 100% !important; padding: 15px !important; 
+    font-size: 16px !important; font-weight: 700 !important; border-radius: 6px !important; 
+    margin-bottom: 15px !important; border: none !important; text-transform: none !important; 
+    display: flex !important; justify-content: center !important; align-items: center !important; 
+    box-sizing: border-box !important;
+}
+.woocommerce div.product form.cart .single_add_to_cart_button:hover { background-color: #1052a3 !important; }
+
+/* Ocultar el enlace molesto de "Ver carrito" de WooCommerce */
+.woocommerce div.product form.cart .added_to_cart,
+.woocommerce div.product form.cart .added_to_cart.wc-forward {
+    display: none !important;
+}
+
+/* Nuestro Botón Outline (Select Lenses) */
+.mmc-btn-azul-outline {
+    background-color: #fff !important; color: #1a6bcf !important; 
+    width: 100% !important; padding: 14px 15px !important; 
+    font-size: 16px !important; font-weight: 700 !important; border: 2px solid #1a6bcf !important; 
+    border-radius: 6px !important; cursor: pointer !important; transition: all 0.3s !important; 
+    text-align: center !important; margin-bottom: 15px !important; display: block !important; 
+    box-sizing: border-box !important;
+}
+.mmc-btn-azul-outline:hover { background-color: #f0f6ff !important; }
+
+/* Nuestro Botón Sólido (Monturas solas) */
+.mmc-btn-azul-solido {
+    background-color: #1a6bcf !important; color: #fff !important; 
+    width: 100% !important; padding: 15px !important; 
+    font-size: 16px !important; font-weight: 700 !important; border: none !important; 
+    border-radius: 6px !important; cursor: pointer !important; margin-bottom: 15px !important; 
+    transition: background 0.3s !important; text-align: center !important; display: block !important; 
+    box-sizing: border-box !important;
+}
+.mmc-btn-azul-solido:hover { background-color: #1052a3 !important; }
+
+
+/* ========================================================
+   3. ENLACES INFERIORES (Blindados contra el tema Kadence)
+   ======================================================== */
+.mmc-enlaces-inferiores { 
+    display: flex !important; 
+    flex-direction: column !important; 
+    margin-top: 15px !important; 
+    border-top: 1px solid #eaeaea !important; 
+    width: 100% !important;
+}
+
+/* Usamos selectores ultra fuertes para ganarle al azul por defecto del tema */
+.mmc-link-seccion,
+.woocommerce div.product .summary a.mmc-link-seccion {
+    display: flex !important; 
+    justify-content: space-between !important; 
+    align-items: center !important; 
+    padding: 15px 5px !important;
+    color: #555 !important; 
+    font-size: 14px !important; 
+    text-decoration: none !important; 
+    border-bottom: 1px solid #eaeaea !important; 
+    transition: color 0.2s ease !important;
+    width: 100% !important;
+    box-shadow: none !important;
+}
+
+.mmc-link-seccion:hover,
+.woocommerce div.product .summary a.mmc-link-seccion:hover { 
+    color: #1a6bcf !important; 
+}
+
+.mmc-arrow { 
+    font-size: 18px !important; 
+    color: #999 !important; 
+    font-weight: bold !important; 
+}
+
+
+
+
+
+
+
+
+/* ========================================================
+   4. CAJA DE CUPÓN Y BENEFICIOS (Administrable)
+   ======================================================== */
+.mmc-caja-cupon {
+    background-color: #f2f9f4;
+    border: 1px solid #d4edda;
+    border-radius: 6px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #155724;
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+.mmc-caja-cupon span { 
+    font-weight: bold; 
+    padding: 2px 6px; 
+    border: 1px dashed #155724; 
+    border-radius: 4px; 
+}
+
+.mmc-lista-beneficios {
+    list-style: none !important; 
+    padding: 0 !important; 
+    margin: 0 0 25px 0 !important; 
+    font-size: 14px; 
+    color: #555;
+}
+.mmc-lista-beneficios li { 
+    margin-bottom: 8px; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================================
+   5. DISEÑO DE PESTAÑAS INFERIORES (TABS)
+  ======================================================== */
+.woocommerce div.product .woocommerce-tabs ul.tabs {
+    display: flex !important;
+    justify-content: center !important; /* Centra las pestañas. Si las quieres a la izquierda cambia a flex-start */
+    gap: 40px !important;
+    border-bottom: 2px solid #eaeaea !important; /* Línea gris de toda la base */
+    padding: 0 !important;
+    margin: 0 0 30px 0 !important;
+    list-style: none !important;
+    background: transparent !important;
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs li {
+    border: none !important;
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 0 0 15px 0 !important;
+    position: relative !important;
+    border-radius: 0 !important;
+}
+
+/* El texto de la pestaña */
+.woocommerce div.product .woocommerce-tabs ul.tabs li a {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #777 !important;
+    text-decoration: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: color 0.3s ease !important;
+    box-shadow: none !important;
+}
+
+/* Estado ACTIVO (El que estás viendo) */
+.woocommerce div.product .woocommerce-tabs ul.tabs li.active a {
+    color: #111 !important;
+}
+
+/* La línea negra inferior de la pestaña activa */
+.woocommerce div.product .woocommerce-tabs ul.tabs li.active::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: -2px !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 3px !important;
+    background-color: #111 !important;
+    display: block !important;
+}
+
+/* Quitar basura de Kadence */
+.woocommerce div.product .woocommerce-tabs ul.tabs li::before { display: none !important; }
+.woocommerce div.product .woocommerce-tabs .panel h2:first-of-type { display: none !important; } /* Oculta títulos dobles */
+
+.woocommerce div.product .woocommerce-tabs .panel {
+    padding: 10px 0 30px 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+
+
+
+
+
+
+/* ========================================================
+   6. PESTAÑA: ABOUT THE FRAME (DISEÑO GRID DE 4 COLUMNAS)
+   ======================================================== */
+.mmc-about-frame-container {
+    display: grid !important;
+    grid-template-columns: 5fr 5fr !important; /* 70% Texto, 30% Ficha Técnica */
+    gap: 40px !important;
+    align-items: start !important;
+    padding-top: 20px !important;
+}
+
+/* Columna Izquierda (Descripción) */
+.mmc-about-frame-desc .mmc-about-title {
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    margin-bottom: 15px !important;
+    color: #111 !important;
+}
+
+/* Columna Derecha: La Tabla Estilo Cuadrícula */
+.mmc-about-frame-attrs table.shop_attributes {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border: none !important;
+}
+
+.mmc-about-frame-attrs table.shop_attributes tbody {
+    display: grid !important;
+    /* Creamos 4 columnas: Label(gris), Valor(blanco), Label(gris), Valor(blanco) */
+    grid-template-columns: 1fr 1.2fr 1fr 1.2fr !important; 
+    gap: 1px !important; /* El "borde" interno lo hace el gap */
+    background-color: #e5e5e5 !important; /* Color de las líneas divisorias */
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+
+/* Desarmamos las filas nativas para que los hijos fluyan en el grid de arriba */
+.mmc-about-frame-attrs table.shop_attributes tr {
+    display: contents !important;
+}
+
+.mmc-about-frame-attrs table.shop_attributes th,
+.mmc-about-frame-attrs table.shop_attributes td {
+    padding: 12px 15px !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    display: flex !important;
+    align-items: center !important;
+    border: none !important;
+    min-height: 45px !important;
+}
+
+/* Estilo de las Etiquetas (th) */
+.mmc-about-frame-attrs table.shop_attributes th {
+    background-color: #f8f8f8 !important; /* Gris muy claro de fondo */
+    color: #666 !important;
+    font-weight: 600 !important;
+}
+
+/* Estilo de los Valores (td) */
+.mmc-about-frame-attrs table.shop_attributes td {
+    background-color: #ffffff !important; /* Fondo blanco */
+    color: #111 !important;
+}
+
+/* Responsive: En tablets/móviles pasamos a 2 columnas para que sea legible */
+@media (max-width: 980px) {
+    .mmc-about-frame-attrs table.shop_attributes tbody {
+        grid-template-columns: 1fr 1.5fr !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .mmc-about-frame-container {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+
+
+
+
+
+
+
+
+/* ========================================================
+   7. PESTAÑA: SIZING & FIT (DISEÑO 50/50 BALANCEADO)
+   ======================================================== */
+.mmc-sizing-tab-container {
+    padding-top: 10px;
+    width: 100%;
+}
+
+.mmc-sizing-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    margin-bottom: 25px !important;
+    color: #111;
+}
+
+.mmc-sizing-layout {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; /* 50% y 50% Exactos */
+    gap: 40px !important;
+    align-items: center !important; /* Centra verticalmente la imagen con los cuadros */
+}
+
+/* Columna Izquierda: Imagen Protagónica */
+.mmc-sizing-image-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mmc-sizing-image-container img {
+    width: 100%;
+    max-height: 300px !important; /* Aumentamos de 120px a 200px para que se vea grande */
+    object-fit: contain !important;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+/* Columna Derecha: Contenedor del Grid */
+.mmc-sizing-grid-container {
+    width: 100%;
+}
+
+.mmc-sizing-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    background: #fff;
+}
+
+.mmc-sizing-box {
+    border-right: 1px solid #e5e5e5 !important;
+    text-align: center;
+}
+
+.mmc-sizing-box:last-child {
+    border-right: none !important;
+}
+
+/* Encabezado de los cuadros */
+.mmc-sizing-header {
+    background-color: #f8f9fa !important;
+    padding: 10px 4px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    color: #888 !important;
+    border-bottom: 1px solid #e5e5e5 !important;
+}
+
+/* Cuerpo de los cuadros */
+.mmc-sizing-body {
+    padding: 20px 5px !important; /* Espacio cómodo para los iconos */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.mmc-sizing-icon {
+    width: 32px !important; /* Iconos un poco más visibles */
+    height: auto !important;
+    opacity: 0.8;
+}
+
+.mmc-sizing-value {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #111;
+}
+
+/* Ayuda inferior */
+.mmc-sizing-help {
+    font-size: 12px;
+    color: #888;
+    margin-top: 15px;
+    text-align: left;
+}
+
+/* Responsive: En tablets/móviles apilamos */
+@media (max-width: 992px) {
+    .mmc-sizing-layout {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+    .mmc-sizing-image-container img {
+        max-height: 150px !important;
+    }
+    .mmc-sizing-grid {
+        grid-template-columns: repeat(3, 1fr) !important; /* 3 y 2 en móvil */
+    }
+}
+
+
+
+
+
+
+/* --- Columna Izquierda: La "Ventana" de Recorte --- */
+.mmc-sizing-image-container {
+    width: 100%;
+    height: 160px !important; /* 1. ALTURA FIJA: No dejará que la fila crezca */
+    overflow: hidden !important; /* 2. RECORTE: Mata todo lo que se salga del zoom */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: #fdfdfd; /* Opcional: fondo sutil para ver el área */
+    border-radius: 4px;
+}
+
+.mmc-sizing-image-container img {
+    /* 3. EL ZOOM REAL */
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Mantiene la proporción sin deformar */
+    
+    transform: scale(1.8) !important; /* 4. AGRANDA EL LENTE: Súbelo a 2.0 si lo quieres más grande */
+    
+    display: block !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================================
+   8. PESTAÑA: SHIPPING & RETURNS (ANCHO COMPLETO)
+   ======================================================== */
+.mmc-shipping-full-width {
+    width: 100% !important;
+    padding-top: 20px !important;
+    max-width: 1000px; /* Centramos un poco el texto para que no sea infinito a los lados */
+    margin: 0 auto;
+}
+
+.mmc-shipping-full-width p {
+    font-size: 15px !important;
+    line-height: 1.8 !important;
+    color: #444 !important;
+    margin-bottom: 20px !important;
+}
+
+.mmc-shipping-full-width strong {
+    color: #111;
+    font-weight: 700;
+}
+
+/* Si usas listas dentro del textarea */
+.mmc-shipping-full-width ul {
+    margin-bottom: 20px !important;
+    padding-left: 20px !important;
+}
+
+.mmc-shipping-full-width li {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #555;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================================
+   9. PESTAÑA: GARANTÍA (DASHBOARD)
+   ======================================================== */
+.mmc-garantia-dashboard {
+    background-color: #f4f9fd !important; /* Fondo azulado sutil */
+    padding: 60px 40px !important;
+    text-align: center;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.mmc-gar-main-icon img {
+    width: 60px !important;
+    height: auto !important;
+    margin-bottom: 20px !important;
+    
+    /* Estas 3 líneas fuerzan el centrado absoluto */
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.mmc-gar-h2 {
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    color: #111e33 !important;
+    margin-bottom: 15px !important;
+}
+
+.mmc-gar-p {
+    font-size: 16px !important;
+    color: #556070 !important;
+    max-width: 700px;
+    margin: 0 auto 50px auto !important;
+    line-height: 1.6 !important;
+}
+
+/* Grid de los 3 beneficios inferiores */
+.mmc-gar-grid {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 80px !important;
+    flex-wrap: wrap;
+}
+
+.mmc-gar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    max-width: 200px;
+}
+
+.mmc-gar-small-ico {
+    height: 40px !important;
+    width: auto !important;
+    object-fit: contain;
+}
+
+.mmc-gar-item span {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #556070 !important;
+    line-height: 1.4;
+}
+
+/* Móvil */
+@media (max-width: 768px) {
+    .mmc-garantia-dashboard { padding: 40px 20px !important; }
+    .mmc-gar-grid { gap: 40px !important; }
+    .mmc-gar-h2 { font-size: 18px !important; }
+}
+
+
+.mmc-garantia-dashboard {
+    background-color: #f4f9fd !important;
+    padding: 25px 40px !important;
+    text-align: center !important; /* Asegura que todo el contenido inline se centre */
+    border-radius: 8px;
+    margin-top: 10px;
+    display: block !important;
+    width: 100% !important;
+}
+
+/* FORZAR VISIBILIDAD DEL TÍTULO DE GARANTÍA */
+.woocommerce div.product .woocommerce-tabs .panel h2.mmc-gar-h2 {
+    display: block !important; /* Esto anula la regla que lo ocultaba */
+    visibility: visible !important;
+    opacity: 1 !important;
+    text-align: center !important;
+    margin: 0 auto 15px auto !important;
+}
+
+/* CENTRADO DEFINITIVO DEL ICONO (ESCUDO) */
+.mmc-gar-main-icon {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-bottom: 20px !important;
+}
+
+.mmc-gar-main-icon img {
+    width: 70px !important; /* Un poco más grande para que luzca */
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================================
+   DISEÑO CON TRANSICIÓN DINÁMICA (ACTUALIZADO Y CENTRADO)
+   ======================================================== */
+
+/* 1. ESTADO: COMPUTADORAS Y LAPTOPS (Dos columnas centradas) */
+@media (min-width: 950px) {
+    .mmc-product-top-container {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: flex-start !important;
+        justify-content: center !important; /* Centrado perfecto */
+        gap: 40px !important; /* Usamos GAP en lugar de paddings raros para separar las columnas */
+        
+        max-width: 1300px !important;
+        margin: 0 auto !important;
+        
+        /* Adiós a los 100px. Usamos algo más limpio para que respire */
+        padding-top: 25px !important;
+        padding-left: 40px !important; 
+        padding-right: 40px !important;
+        padding-bottom: 20px !important;
+        box-sizing: border-box !important;
+    }
+
+    .mmc-column-images {
+        width: 58% !important; /* Ajustado por porcentaje para ser flexible */
+        max-width: 700px !important;
+        box-sizing: border-box !important;
+    }
+
+    .mmc-column-info {
+        width: 42% !important; /* Ajustado por porcentaje */
+        min-width: 300px !important; /* Permite que se encoja sin romperse */
+        max-width: 500px !important;
+        padding: 0 !important; /* Eliminamos el padding de 50px que empujaba el diseño */
+        box-sizing: border-box !important;
+    }
+}
+
+/* 2. ESTADO: TABLETS Y PANTALLAS MEDIANAS (Vertical con "Corset") */
+@media (max-width: 949px) and (min-width: 600px) {
+    .mmc-product-top-container {
+        display: block !important;
+        max-width: 700px !important; 
+        margin: 0 auto !important;
+        padding-top: 20px !important;
+        padding-left: 25px !important;
+        padding-right: 25px !important;
+        box-sizing: border-box !important;
+    }
+
+    .mmc-column-images, .mmc-column-info {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+    }
+}
+
+/* 3. ESTADO: CELULARES (Todo el ancho disponible) */
+@media (max-width: 599px) {
+    .mmc-product-top-container {
+        display: block !important;
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+        box-sizing: border-box !important;
+    }
+
+    .mmc-column-images, .mmc-column-info {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 1000px) {
+    /* 1. Destruimos la orden de "estar uno al lado del otro" */
+    .woocommerce div.product .mmc-product-top-container,
+    .mmc-product-top-container {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* 2. Forzamos a la columna de imágenes y de info a soltarse y bajar */
+    .woocommerce div.product .mmc-column-images,
+    .woocommerce div.product .summary.entry-summary,
+    .woocommerce div.product .mmc-column-info {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: none !important; /* 🔥 LA MAGIA: Esto evita el aplastamiento 🔥 */
+        float: none !important;
+        clear: both !important;
+        padding-left: 20px !important; /* Margen seguro a los lados */
+        padding-right: 20px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+}
+/* ========================================================
+   DISEÑO < 1000px: DESCRIPCIÓN LIBRE + CARD BOTTOM SHEET + SIZING
+   ======================================================== */
+
+@media (max-width: 1000px) {
+    /* Ocultamos las pestañas rotas del tema para siempre */
+    .woocommerce div.product .woocommerce-tabs {
+        display: none !important;
+    }
+
+    /* --- 1. BLOQUE DE DESCRIPCIÓN (VISIBLE) --- */
+    .mmc-mobile-description-block {
+        margin: 10px 70px 20px 70px; /* Márgenes laterales de 100px */
+        
+        
+    }
+    
+.mmc-mobile-description-block h3:not(.mmc-about-title) {
+        display: none !important;
+    }
+    
+/* 🔥 2. Aseguramos que tu título personalizado SÍ se vea y tenga su estilo 🔥 */
+    .mmc-mobile-description-block h3.mmc-about-title {
+        display: block !important;
+        font-size: 18px;
+        font-weight: 700;
+        color: #111;
+        margin-bottom: 15px;
+    }
+    
+    .mmc-mobile-description-block h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111;
+        margin-bottom: 15px;
+    
+    }
+
+    .mmc-mobile-description-block .mmc-desc-texto {
+        font-size: 15px;
+        color: #4a4a4a;
+        line-height: 1.6;
+    }
+
+    /* --- 2. LA TARJETA (CARD) DE OPCIONES --- */
+    .mmc-mobile-tabs-card {
+        margin: 0 100px 40px 100px;
+        border: 1px solid #e2e8f0; /* El borde estilo cajita */
+        border-radius: 8px; /* Esquinas redondeadas */
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .mmc-tab-boton {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 20px; /* Padding interno de la tarjeta */
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 15px;
+        font-weight: 500;
+        color: #000;
+        cursor: pointer;
+        background: transparent;
+    }
+
+    /* Le quitamos la línea al último botón para que no se vea feo en la tarjeta */
+    .mmc-tab-boton:last-child {
+        border-bottom: none;
+    }
+
+    .mmc-tab-boton .mmc-icono-mas {
+        font-size: 20px;
+        font-weight: 300;
+        color: #666; /* Gris sutil para el más */
+    }
+
+    /* --- 3. EL BOTTOM SHEET (VENTANA MODAL) --- */
+    .mmc-bottom-sheet-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); 
+        z-index: 999998;
+    }
+
+    .mmc-bottom-sheet-modal {
+        position: fixed;
+        bottom: -100%; 
+        left: 0;
+        width: 100%;
+        height: auto;
+        max-height: 85vh; 
+        background: #fff;
+        z-index: 999999;
+        border-radius: 20px 20px 0 0; 
+        box-shadow: 0 -5px 25px rgba(0,0,0,0.15);
+        transition: bottom 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); 
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mmc-bottom-sheet-modal.abierto {
+        bottom: 0; 
+    }
+
+    /* La "Rayita" de arrastre superior */
+    .mmc-bs-drag-line {
+        width: 36px;
+        height: 4px;
+        background: #dcdcdc;
+        border-radius: 4px;
+        margin: 12px auto 0 auto;
+    }
+
+    .mmc-bs-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 25px 20px 25px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .mmc-bs-header h3 {
+        margin: 0 !important;
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #000 !important;
+    }
+
+    .mmc-bs-header button {
+        background: none;
+        border: none;
+        font-size: 24px;
+        line-height: 1;
+        cursor: pointer;
+        color: #888;
+        padding: 0;
+    }
+
+    .mmc-bs-content {
+        padding: 25px;
+        overflow-y: auto; 
+        font-size: 15px;
+        color: #4a4a4a;
+        line-height: 1.6;
+    }
+
+    /* --- 4. AJUSTES ESPECÍFICOS PARA SIZING & FIT EN EL MODAL --- */
+
+    /* Ocultar la foto grande del lente en el modal móvil */
+    #mmc-bs-contenido .mmc-sizing-image-container {
+        display: none !important; 
+    }
+
+    /* Disfrazar la tabla de WooCommerce como Lista de Viñetas */
+    .mmc-mobile-attributes-list table.shop_attributes {
+        border: none !important;
+        margin-bottom: 25px !important;
+        width: 100% !important;
+    }
+    .mmc-mobile-attributes-list table.shop_attributes tr {
+        display: block !important;
+        border: none !important;
+        position: relative;
+        padding-left: 15px; 
+        margin-bottom: 6px;
+    }
+    .mmc-mobile-attributes-list table.shop_attributes tr::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        top: 0;
+        color: #4a4a4a;
+        font-size: 14px;
+    }
+    .mmc-mobile-attributes-list table.shop_attributes th,
+    .mmc-mobile-attributes-list table.shop_attributes td {
+        display: inline-block !important;
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+        font-size: 14px !important;
+        color: #4a4a4a !important;
+        font-style: normal !important;
+    }
+    .mmc-mobile-attributes-list table.shop_attributes th {
+        color: #111 !important;
+        font-weight: 700 !important;
+        margin-right: 5px !important;
+    }
+    .mmc-mobile-attributes-list table.shop_attributes th::after {
+        content: ":"; 
+    }
+    .mmc-mobile-attributes-list table.shop_attributes td p {
+        margin: 0 !important;
+        display: inline !important;
+    }
+
+    /* Disfrazar tu HTML nativo como una Cuadrícula 2x2 */
+#mmc-bs-contenido .mmc-sizing-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important; /* <--- CAMBIADO A 3 COLUMNAS */
+        border-top: 1px solid #e2e8f0;
+        border-left: 1px solid #e2e8f0;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-top: 15px;
+        margin-bottom: 20px;
+    }
+    #mmc-bs-contenido .mmc-sizing-box {
+        border-right: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 15px 10px;
+        text-align: center;
+        background: #fafafa;
+    }
+    #mmc-bs-contenido .mmc-sizing-icon {
+        height: 32px !important;
+        width: auto !important;
+        margin: 0 auto 10px auto !important;
+        opacity: 0.6;
+        display: block;
+    }
+    #mmc-bs-contenido .mmc-sizing-header {
+        font-size: 13px !important;
+        color: #555 !important;
+        margin-bottom: 5px;
+    }
+    #mmc-bs-contenido .mmc-sizing-body span {
+        font-weight: 700;
+        color: #111;
+        font-size: 14px;
+    }
+
+    /* --- AJUSTE PARA MÓVILES PEQUEÑOS --- */
+    @media (max-width: 767px) {
+        .mmc-mobile-description-block,
+        .mmc-mobile-tabs-card {
+            margin-left: 20px; /* Reducimos los 100px a 20px */
+            margin-right: 20px;
+        }
+    }
+}
+
+/* ========================================================
+   1. CORRECCIÓN ESCRITORIO: OCULTAR ELEMENTOS MÓVILES
+   ======================================================== */
+@media (min-width: 1001px) {
+    /* Escondemos la descripción suelta, la tarjeta de botones y el modal en PC */
+    .mmc-mobile-description-block,
+    .mmc-mobile-tabs-card,
+    .mmc-bottom-sheet-overlay,
+    .mmc-bottom-sheet-modal {
+        display: none !important;
+    }
+}
+
+/* ========================================================
+   CORRECCIÓN: TABLA A LISTA (SOLO EN MÓVIL / BOTTOM SHEET)
+   ======================================================== */
+
+@media (max-width: 1000px) {
+    /* 1. Destruir el fondo gris y la cuadrícula SOLO en el contenedor móvil */
+    .mmc-mobile-attributes-list table.shop_attributes,
+    .mmc-mobile-attributes-list table.shop_attributes tbody {
+        display: block !important;
+        border: none !important;
+        background: transparent !important; /* Mata el fondo gris */
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 0 25px 0 !important;
+        width: 100% !important;
+    }
+
+    /* 2. Forzar que CADA FILA ocupe el 100% */
+    .mmc-mobile-attributes-list table.shop_attributes tr {
+        display: block !important;
+        height: 30px;
+        width: 100% !important;
+        border: none !important;
+        background: transparent !important;
+        position: relative !important;
+        padding: 0 0 0 15px !important; /* Espacio para la viñeta */
+        margin: 0 0 3px 0 !important;
+        float: none !important;
+    }
+
+    /* 3. Dibujar el punto de lista (viñeta) */
+    .mmc-mobile-attributes-list table.shop_attributes tr::before {
+        content: "•" !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        color: #4a4a4a !important;
+        font-size: 16px !important;
+        line-height: 1.5 !important;
+    }
+
+    /* 4. Título y Valor en la misma línea */
+    .mmc-mobile-attributes-list table.shop_attributes th,
+    .mmc-mobile-attributes-list table.shop_attributes td {
+        display: inline-block !important;
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        text-align: left !important;
+        font-size: 14px !important;
+        line-height: 1.5 !important;
+        width: auto !important;
+    }
+
+    /* 5. Estilo del Título (Negrita) */
+    .mmc-mobile-attributes-list table.shop_attributes th {
+        color: #111 !important;
+        font-weight: 700 !important;
+        margin-right: 5px !important;
+    }
+
+    .mmc-mobile-attributes-list table.shop_attributes th::after {
+        content: ":" !important;
+    }
+
+    /* 6. Estilo del Valor (Gris oscuro) */
+    .mmc-mobile-attributes-list table.shop_attributes td {
+        color: #4a4a4a !important;
+    }
+
+    .mmc-mobile-attributes-list table.shop_attributes td p {
+        margin: 0 !important;
+        display: inline !important;
+    }
+
+    /* Matar los estilos "cebra" (rayas grises) que ponen algunos temas */
+    .mmc-mobile-attributes-list table.shop_attributes tr:nth-child(even),
+    .mmc-mobile-attributes-list table.shop_attributes tr:nth-child(odd) {
+        background: transparent !important;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================================
+   1. DISEÑO DE GALERÍA DE ESCRITORIO (VERTICAL, MINIATURAS A LA IZQUIERDA)
+   A partir de 901px
+   ======================================================== */
+@media (min-width: 901px) {
+    .woocommerce div.product .summary.entry-summary {
+        min-width: 380px !important;
+    }
+}
+
+.woocommerce div.product .summary.entry-summary {
+    margin-left: auto !important;
+    padding: 0px 0px 0px 20px !important;
+    margin-right: auto !important;
+}   
+
+/* Ajustes para Swiper */
+.swiper-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.swiper-slide img {
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+    pointer-events: none; 
+}
+
+.mmc-gallery-main-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 15px;
+    width: 100%;
+    align-items: flex-start !important;
+}
+
+.mmc-thumbnails-stack {
+    flex: 0 0 85px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px;
+    margin: 0 !important;
+}
+
+/* 🔥 ESTE ES EL CONTENEDOR CLAVE 🔥 */
+.mmc-main-image-container {
+    flex: 1 !important;
+    background: #fdfdfd;
+    overflow: hidden;
+    border-radius: 4px;
+    margin: 0 !important;
+    position: relative !important; /* <--- LA MAGIA ESTÁ AQUÍ. Evita que la píldora se vaya a las miniaturas */
+}
+
+.mmc-main-image-container img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 450px !important; /* <--- REDUCIMOS UN POCO EL ALTO DE LA IMAGEN EN ESCRITORIO */
+    display: block;
+    object-fit: contain !important; /* Asegura que la imagen no se deforme */
+    margin: 0 auto !important; /* Asegura que se mantenga al centro de la caja */
+    transition: opacity 0.3s ease;
+}
+
+.mmc-thumb-item {
+    cursor: pointer;
+    border: 1px solid #ececec;
+    transition: all 0.2s ease-in-out;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.mmc-thumb-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+.mmc-thumb-item:hover {
+    border-color: #ccc;
+}
+
+.mmc-active-thumb {
+    border-color: #000 !important;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+/* ========================================================
+   2. AJUSTE MÓVIL (GALERÍA) - Menos de 767px
+   (Miniaturas como puntos en la parte inferior)
+   ======================================================== */
+@media (max-width: 767px) {
+    .mmc-gallery-main-wrapper {
+        flex-direction: column !important; 
+        gap: 15px;
+        align-items: center !important;
+    }
+    .mmc-main-image-container {
+        order: 1 !important; 
+        width: 100% !important;
+        touch-action: pan-y; 
+    }
+    .mmc-thumbnails-stack {
+        order: 2 !important; 
+        flex-direction: row !important; 
+        justify-content: center !important;
+        align-items: center !important;
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        gap: 8px !important;
+        margin: 0 !important;
+        padding: 5px 0 15px 0 !important;
+    }
+    .mmc-thumb-item {
+        flex: 0 0 10px !important;
+        height: 10px !important;
+        border-radius: 50% !important;
+        background: #dcdcdc !important;
+        border: none !important;
+        padding: 0 !important;
+        overflow: hidden;
+    }
+    .mmc-thumb-item img { display: none !important; }
+    .mmc-active-thumb {
+        background: #555555 !important;
+        box-shadow: none !important;
+        transform: scale(1.2);
+    }
+}
+
+/* ========================================================
+   3. DISEÑO MÓVIL: COLORES ARRIBA - Menos de 900px
+   ======================================================== */
+.mmc-colores-movil-clon { display: none !important; }
+
+@media (max-width: 949px) {
+    .mmc-colores-movil-clon {
+        display: block !important;
+        margin-bottom: 20px !important;
+        padding-bottom: 20px !important;
+        border-bottom: 1px solid #f0f0f0 !important;
+        width: 100% !important;
+    }
+    form.variations_form .variations { display: none !important; }
+}
+
+/* =======================================================
+   4. SECCIÓN: PÍLDORA DE BENEFICIOS (NUEVO DISEÑO ESPEJO)
+   ======================================================= */
+
+/* --- VERSIÓN DE ESCRITORIO --- */
+.mmc-pildora-escritorio {
+    display: block !important;
+    width: 100% !important;
+}
+
+.mmc-contenedor-pildora-limitado {
+    position: relative !important; /* Ya no es absoluto/flotante */
+    width: 100% !important; /* Toma todo el ancho de miniaturas + foto principal */
+    margin-top: 25px !important; /* Espacio de separación debajo de las fotos */
+    margin-bottom: 20px !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    z-index: 10 !important; 
+    pointer-events: auto !important; 
+}
+
+.mmc-pildora-final-diseno {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #e9ebeb !important;
+    border-radius: 50px !important;
+    padding: 8px 15px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+    pointer-events: auto !important;
+    overflow: hidden !important; 
+}
+
+.pildora-title {
+    color: #1a56a8 !important;
+    font-weight: 800 !important;
+    font-size: 13px !important;
+    margin-right: 12px !important;
+    text-transform: uppercase !important;
+    white-space: normal !important; 
+    word-break: break-word !important; 
+    line-height: 1.1 !important;
+    flex-shrink: 1 !important; 
+    text-align: right !important;
+}
+
+.pildora-item {
+    display: flex !important;
+    align-items: center !important;
+    color: #3b4754 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 0 10px !important;
+    border-left: 1px solid rgba(255,255,255,0.6) !important;
+    white-space: normal !important; 
+    word-break: break-word !important;
+    line-height: 1.1 !important;
+    flex-shrink: 1 !important;
+}
+
+.pildora-item:first-of-type {
+    border-left: none !important;
+}
+
+/* Bloqueo a imágenes gigantes */
+.pildora-item img {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important; 
+    max-width: 20px !important; 
+    margin-right: 6px !important;
+    object-fit: contain !important;
+    display: block !important; 
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+/* --- VERSIÓN MÓVIL (CUADRÍCULA) --- */
+.mmc-cuadricula-movil {
+    display: none !important; /* Oculta por defecto en escritorio */
+    width: 100% !important;
+    margin-top: 15px !important;
+}
+
+.mmc-titulo-cuadricula {
+    font-weight: 800 !important;
+    font-size: 18px !important;
+    margin-bottom: 12px !important;
+    color: #1a1e26 !important;
+}
+
+.mmc-grid-beneficios {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+}
+
+.mmc-grid-item {
+    background-color: #f1f8fc !important;
+    border-radius: 8px !important;
+    padding: 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+}
+
+.mmc-grid-item img {
+    width: 32px !important;
+    height: 32px !important;
+    margin-bottom: 10px !important;
+    object-fit: contain !important;
+}
+
+.mmc-grid-texto {
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    color: #3b4754 !important;
+    line-height: 1.3 !important;
+}
+
+/* =======================================================
+   5. AJUSTES RESPONSIVE DE PÍLDORA (AHORA ME VES, AHORA NO)
+   ======================================================= */
+
+/* =======================================================
+   5. AJUSTES RESPONSIVE DE PÍLDORA (TRANSICIONES)
+   ======================================================= */
+
+/* Entre 901px y 1200px: Título Arriba, Opciones Abajo */
+@media (min-width: 901px) and (max-width: 1200px) {
+    .mmc-pildora-final-diseno {
+        flex-wrap: wrap !important; 
+        justify-content: center !important;
+        padding: 15px 20px !important; /* Aumentamos el relleno para usar el espacio lateral */
+        border-radius: 30px !important; 
+    }
+    
+    .pildora-title {
+        width: 100% !important; 
+        text-align: center !important; 
+        margin-right: 0 !important;
+        margin-bottom: 10px !important; 
+        font-size: 14px !important; /* Subimos el título a 14px */
+        display: block !important;
+    }
+    
+    .pildora-item {
+        padding: 0 15px !important; /* Damos más aire entre cada beneficio */
+        font-size: 12px !important; /* Subimos la letra de 10px a 12px (mucho más legible) */
+    }
+    
+    .pildora-item img {
+        width: 18px !important; /* Iconos un pelín más grandes para que hagan juego */
+        height: 18px !important;
+        min-width: 18px !important;
+        max-width: 18px !important;
+    }
+    
+
+}
+
+
+
+/* Menos de 900px: Activamos el diseño "espejo" (Cuadrícula 2x2 abajo) */
+@media (max-width: 900px) {
+    /* 1. Ocultamos la barra gris de escritorio */
+    .mmc-pildora-escritorio {
+        display: none !important;
+    }
+    
+    /* 2. Mostramos la cuadrícula de beneficios */
+    .mmc-cuadricula-movil {
+        display: block !important;
+    }
+}

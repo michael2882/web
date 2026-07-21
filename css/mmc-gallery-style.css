@@ -1,0 +1,306 @@
+/* ========================================================
+   DISEÑO DE GALERÍA: MINIATURAS A LA IZQUIERDA (VERTICAL)
+   ======================================================== */
+@media (min-width: 901px) {
+    .woocommerce div.product .summary.entry-summary {
+min-width: 380px !important;
+    }
+}
+.woocommerce div.product .summary.entry-summary {
+    /* Ajusta este número (ej. 400px, 500px) */
+    margin-left: auto !important;
+    padding: 0px 0px 0px 0px !important;;
+    margin-right: auto !important;
+}   
+/* Ajustes para Swiper */
+.swiper-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+.swiper-slide img {
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+    pointer-events: none; /* Evita que el mouse intente descargar la imagen al arrastrar */
+}
+
+
+.mmc-gallery-main-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 15px;
+    width: 100%;
+    align-items: flex-start !important;
+}
+
+.mmc-thumbnails-stack {
+    flex: 0 0 85px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px;
+    margin: 0 !important;
+}
+
+.mmc-main-image-container {
+    flex: 1 !important;
+    background: #fdfdfd;
+    overflow: hidden;
+    border-radius: 4px;
+    margin: 0 !important;
+}
+
+.mmc-main-image-container img {
+    width: 100% !important;
+    height: auto !important;
+    display: block;
+    object-fit: contain;
+    transition: opacity 0.3s ease;
+    /* 👇 LA MAGIA ESTÁ AQUÍ 👇 */
+    max-height: 450px !important; 
+}
+
+.mmc-thumb-item {
+    cursor: pointer;
+    border: 1px solid #ececec;
+    transition: all 0.2s ease-in-out;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.mmc-thumb-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+.mmc-thumb-item:hover {
+    border-color: #ccc;
+}
+
+.mmc-active-thumb {
+    border-color: #000 !important;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+/* ========================================================
+   AJUSTE MÓVIL (PUNTOS ABAJO Y PREPARADO PARA SWIPE)
+   ======================================================== */
+@media (max-width: 767px) {
+    .mmc-gallery-main-wrapper {
+        flex-direction: column !important; 
+        gap: 15px;
+        align-items: center !important;
+    }
+
+    /* 1. Obligamos a la imagen principal a quedarse ARRIBA */
+    .mmc-main-image-container {
+        order: 1 !important; 
+        width: 100% !important;
+        touch-action: pan-y; /* Permite scroll vertical normal, pero atrapa el horizontal */
+    }
+
+    /* 2. Obligamos a los puntos a irse ABAJO */
+    .mmc-thumbnails-stack {
+        order: 2 !important; 
+        flex-direction: row !important; 
+        justify-content: center !important;
+        align-items: center !important;
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        gap: 8px !important;
+        margin: 0 !important;
+        padding: 5px 0 15px 0 !important;
+    }
+
+    .mmc-thumb-item {
+        flex: 0 0 10px !important;
+        height: 10px !important;
+        border-radius: 50% !important;
+        background: #dcdcdc !important;
+        border: none !important;
+        padding: 0 !important;
+        overflow: hidden;
+    }
+
+    .mmc-thumb-item img {
+        display: none !important;
+        
+    }
+
+    .mmc-active-thumb {
+        background: #555555 !important;
+        box-shadow: none !important;
+        transform: scale(1.2);
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    .mmc-main-image-container {
+    flex: 1 !important;
+    background: #fdfdfd;
+    overflow: hidden !important; /* 🔥 VITAL: Esto actúa como tijera cortando el espacio blanco que sobra 🔥 */
+    border-radius: 4px;
+    margin: 0 !important;
+    position: relative !important; 
+    
+    /* 👇 LA NUEVA MAGIA ESTÁ AQUÍ 👇 */
+    max-height: 400px !important; /* Ajusta este número para hacer la caja más alta o más chata */
+    
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 2. LA IMAGEN (Aquí controlamos el tamaño del producto) */
+.mmc-main-image-container img {
+    width: 100% !important;
+    height: 100% !important; /* Obliga a la imagen a llenar toda la altura de la caja */
+    display: block;
+    
+    /* 🔥 TRUCO 1: "cover" en lugar de "contain" recorta el blanco superior e inferior automáticamente */
+    object-fit: cover !important; 
+    object-position: center !important; /* Mantiene las gafas perfectamente al centro */
+    
+    /* 🔥 TRUCO 2 (ZOOM CONFIGURABLE): Descomenta esta línea si quieres acercar más el producto manualmente */
+    /* transform: scale(1.15); /* 1.15 significa 15% de zoom. Súbelo a 1.2 o bájalo a 1.05 hasta que quede perfecto */
+    
+    transition: opacity 0.3s ease;
+}
+}
+
+
+
+
+
+
+
+
+/* ========================================================
+   DISEÑO MÓVIL: COLORES ARRIBA (MÉTODO CLON ESPEJO)
+   ======================================================== */
+
+.mmc-colores-movil-clon {
+    display: none !important;
+}
+
+@media (max-width: 940px) {
+    /* Mostramos el clon arriba */
+    .mmc-colores-movil-clon {
+        display: block !important;
+        margin-bottom: 20px !important;
+        padding-bottom: 20px !important;
+        border-bottom: 1px solid #f0f0f0 !important;
+        width: 100% !important;
+    }
+
+    /* Ocultamos toda la fila de variaciones original abajo */
+    form.variations_form .variations {
+        display: none !important;
+    }
+
+
+
+.mmc-main-image-container {
+    flex: 1 !important;
+    background: #fdfdfd;
+    overflow: hidden !important; /* 🔥 VITAL: Esto actúa como tijera cortando el espacio blanco que sobra 🔥 */
+    border-radius: 4px;
+    margin: 0 !important;
+    position: relative !important; 
+    
+    /* 👇 LA NUEVA MAGIA ESTÁ AQUÍ 👇 */
+    max-height: 400px !important; /* Ajusta este número para hacer la caja más alta o más chata */
+    
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 2. LA IMAGEN (Aquí controlamos el tamaño del producto) */
+.mmc-main-image-container img {
+    width: 100% !important;
+    height: 100% !important; /* Obliga a la imagen a llenar toda la altura de la caja */
+    display: block;
+    
+    /* 🔥 TRUCO 1: "cover" en lugar de "contain" recorta el blanco superior e inferior automáticamente */
+    object-fit: cover !important; 
+    object-position: center !important; /* Mantiene las gafas perfectamente al centro */
+    
+    /* 🔥 TRUCO 2 (ZOOM CONFIGURABLE): Descomenta esta línea si quieres acercar más el producto manualmente */
+    /* transform: scale(1.15); /* 1.15 significa 15% de zoom. Súbelo a 1.2 o bájalo a 1.05 hasta que quede perfecto */
+    
+    transition: opacity 0.3s ease;
+}
+}
+
+
+
+
+
+.mmc-main-image-container {
+    flex: 1 !important;
+    background: #fdfdfd;
+    overflow: hidden !important; /* 🔥 VITAL: Esto actúa como tijera cortando el espacio blanco que sobra 🔥 */
+    border-radius: 4px;
+    margin: 0 !important;
+    position: relative !important; 
+    
+    /* 👇 LA NUEVA MAGIA ESTÁ AQUÍ 👇 */
+    max-height: 400px !important; /* Ajusta este número para hacer la caja más alta o más chata */
+    
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 2. LA IMAGEN (Aquí controlamos el tamaño del producto) */
+.mmc-main-image-container img {
+    width: 100% !important;
+    height: 100% !important; /* Obliga a la imagen a llenar toda la altura de la caja */
+    display: block;
+    
+    /* 🔥 TRUCO 1: "cover" en lugar de "contain" recorta el blanco superior e inferior automáticamente */
+    object-fit: cover !important; 
+    object-position: center !important; /* Mantiene las gafas perfectamente al centro */
+    
+    /* 🔥 TRUCO 2 (ZOOM CONFIGURABLE): Descomenta esta línea si quieres acercar más el producto manualmente */
+    /* transform: scale(1.15); /* 1.15 significa 15% de zoom. Súbelo a 1.2 o bájalo a 1.05 hasta que quede perfecto */
+    
+    transition: opacity 0.3s ease;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
