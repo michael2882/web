@@ -168,6 +168,111 @@ function mmc_construir_modal_optica() {
                     </div>
                 </div>
 
+<!-- ===================== PANTALLA: PRESCRIPCIÓN ONLINE (FORMULARIO) ===================== -->
+<div class="mmc-pantalla" id="pantalla-prescripcion-online" style="display:none;">
+    <button class="mmc-btn-volver-pantalla" data-destino="prescripcion">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Atrás
+    </button>
+    <h2 class="mmc-titulo-paso">Completa tu receta en línea</h2>
+
+    <button type="button" id="mmc-como-leer-btn" class="mmc-como-leer-link">
+        Cómo leer mi receta
+        <span class="mmc-help-circle">?</span>
+    </button>
+
+    <div class="mmc-rx-table-wrap">
+        <table class="mmc-rx-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Esfera (SPH)</th>
+                    <th>Cilindro (CYL)</th>
+                    <th>Eje (AXI)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Derecho (OD)</th>
+                    <td><select class="mmc-rx-select" id="rx-od-sph"></select></td>
+                    <td><select class="mmc-rx-select" id="rx-od-cyl"></select></td>
+                    <td><select class="mmc-rx-select" id="rx-od-axi" disabled></select></td>
+                </tr>
+                <tr>
+                    <th>Izquierdo (OS)</th>
+                    <td><select class="mmc-rx-select" id="rx-os-sph"></select></td>
+                    <td><select class="mmc-rx-select" id="rx-os-cyl"></select></td>
+                    <td><select class="mmc-rx-select" id="rx-os-axi" disabled></select></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mmc-rx-pd-wrap">
+        <div class="mmc-rx-pd-single" id="mmc-rx-pd-single-box">
+            <label>PD</label>
+            <select class="mmc-rx-select" id="rx-pd-single"></select>
+        </div>
+        <div class="mmc-rx-pd-dual" id="mmc-rx-pd-dual-box" style="display:none;">
+            <div class="mmc-rx-pd-dual-item">
+                <label>Izquierda</label>
+                <select class="mmc-rx-select" id="rx-pd-izq"></select>
+            </div>
+            <div class="mmc-rx-pd-dual-item">
+                <label>Derecha</label>
+                <select class="mmc-rx-select" id="rx-pd-der"></select>
+            </div>
+        </div>
+        <label class="mmc-rx-checkbox-label">
+            <input type="checkbox" id="mmc-rx-2pd-check"> Tengo 2 números PD
+        </label>
+    </div>
+
+    <div class="mmc-rx-comentarios">
+        <label>Comentarios adicionales</label>
+        <textarea id="rx-comentarios" placeholder="Agregar un comentario..."></textarea>
+    </div>
+
+    <button class="mmc-btn-continuar" id="btn-rx-online-continuar">Continuar</button>
+</div>
+
+<!-- ===================== MODAL: CÓMO LEER MI RECETA ===================== -->
+<div id="mmc-como-leer-overlay">
+    <div id="mmc-como-leer-modal">
+        <button id="mmc-como-leer-cerrar" aria-label="Cerrar">×</button>
+
+        <div id="mmc-como-leer-tabs">
+            <h3>Aprende a leer tu receta médica.</h3>
+            <button type="button" class="mmc-cl-tab active" data-tab="sph">Esfera (SPH)</button>
+            <button type="button" class="mmc-cl-tab" data-tab="cyl">Cilindro (CYL)</button>
+            <button type="button" class="mmc-cl-tab" data-tab="axi">Eje (AXI)</button>
+            <button type="button" class="mmc-cl-tab" data-tab="pd">PD</button>
+            <button type="button" class="mmc-cl-tab" data-tab="pd2">2 números PD</button>
+        </div>
+
+        <div id="mmc-como-leer-contenido">
+            <h4 id="mmc-cl-titulo">Esfera (SPH)</h4>
+            <p id="mmc-cl-texto"></p>
+
+            <table class="mmc-cl-ejemplo">
+                <thead>
+                    <tr><th></th><th data-col="sph">Esfera</th><th data-col="cyl">Cilindro</th><th data-col="axi">Eje</th></tr>
+                </thead>
+                <tbody>
+                    <tr><th>Derecha (OD)</th><td data-col="sph">+0,50</td><td data-col="cyl">-0,50</td><td data-col="axi">095</td></tr>
+                    <tr><th>Izquierda (OS)</th><td data-col="sph">+0,75</td><td data-col="cyl">-0,50</td><td data-col="axi">085</td></tr>
+                </tbody>
+            </table>
+
+            <table class="mmc-cl-ejemplo-pd" style="display:none;">
+                <tbody><tr><th>PD</th><td>62</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
                 <!-- ===================== PANTALLA: VISIÓN CERCANA (expandible) ===================== -->
                 <div class="mmc-pantalla" id="pantalla-vision-cercana" style="display:none;">
                     <button class="mmc-btn-volver-pantalla" data-destino="uso">
@@ -263,29 +368,37 @@ function mmc_construir_modal_optica() {
                     </div>
                 </div>
 
-                <!-- ===================== PANTALLA: PAQUETES DE LENTE (PASO 3) ===================== -->
-                <div class="mmc-pantalla" id="pantalla-paquetes" style="display:none;">
-                    <button class="mmc-btn-volver-pantalla" id="btn-volver-paquetes">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-                        Atrás
-                    </button>
-                    <h2 class="mmc-titulo-paso">Elige el paquete de lente</h2>
-                    <div class="mmc-paquetes-lista" id="mmc-paquetes-lista">
-                        <!-- Se llena dinámicamente con JS según el flujo activo -->
-                    </div>
-                </div>
+<!-- REEMPLAZAR POR: -->
+<!-- REEMPLAZAR POR: -->
+<!-- ===================== PANTALLA: PROTECCIÓN (PASO 3) — diseño "tipo-card" ===================== -->
+<div class="mmc-pantalla" id="pantalla-proteccion" style="display:none;">
+    <button class="mmc-btn-volver-pantalla" id="btn-volver-proteccion">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Atrás
+    </button>
+    <h2 class="mmc-titulo-paso">Elige la protección de tu lente</h2>
+    <div class="mmc-tipos-lista" id="mmc-protecciones-lista"></div>
+</div>
 
-                <!-- ===================== PANTALLA: TIPO DE LENTE (PASO 4) ===================== -->
-                <div class="mmc-pantalla" id="pantalla-tipo-lente" style="display:none;">
-                    <button class="mmc-btn-volver-pantalla" id="btn-volver-tipo-lente">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-                        Atrás
-                    </button>
-                    <h2 class="mmc-titulo-paso">Tipo de lente</h2>
-                    <div class="mmc-tipos-lista" id="mmc-tipos-lista">
-                        <!-- Se llena dinámicamente con JS -->
-                    </div>
-                </div>
+<!-- ===================== PANTALLA: SUB-PROTECCIÓN (PASO 3b) — mismo diseño ===================== -->
+<div class="mmc-pantalla" id="pantalla-subproteccion" style="display:none;">
+    <button class="mmc-btn-volver-pantalla" id="btn-volver-subproteccion">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Atrás
+    </button>
+    <h2 class="mmc-titulo-paso">Elige una opción</h2>
+    <div class="mmc-tipos-lista" id="mmc-subprotecciones-lista"></div>
+</div>
+
+<!-- ===================== PANTALLA: ÍNDICE (PASO 4) — diseño "paquete-card" ===================== -->
+<div class="mmc-pantalla" id="pantalla-indice" style="display:none;">
+    <button class="mmc-btn-volver-pantalla" id="btn-volver-indice">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Atrás
+    </button>
+    <h2 class="mmc-titulo-paso">Elige el índice de tu lente</h2>
+    <div class="mmc-paquetes-lista" id="mmc-indices-lista"></div>
+</div>
 
                 <!-- ===================== PANTALLA: RESUMEN (PASO 4) ===================== -->
                 <div class="mmc-pantalla" id="pantalla-paso4" style="display:none;">
@@ -299,23 +412,28 @@ function mmc_construir_modal_optica() {
     </div>
 
     <!-- TOOLTIP FLOTANTE -->
+    <div id="mmc-tooltip-overlay">
     <div id="mmc-tooltip-box">
+        <button id="mmc-tooltip-cerrar" aria-label="Cerrar">×</button>
         <p id="mmc-tooltip-texto"></p>
         <img id="mmc-tooltip-img" src="" alt="" style="display:none;">
     </div>
+</div>
     </div>
 
     <script>
         var mmcPrecioBase = <?php echo json_encode($precio_base); ?>;
         var mmcSymbol     = '<?php echo esc_js(get_woocommerce_currency_symbol()); ?>';
-        var mmcPaquetes   = <?php
-            $flujos = ['simple','cercana','progresivo','bifocal','sin_graduacion'];
-            $paquetes_data = [];
-            foreach($flujos as $flujo) {
-                $paquetes_data[$flujo] = get_option('mmc_paquetes_' . $flujo, []);
-            }
-            echo json_encode($paquetes_data);
-        ?>;
+// REEMPLAZAR POR:
+var mmcProtecciones = <?php
+    $flujos = ['simple','cercana','progresivo','bifocal','sin_graduacion'];
+    $protecciones_data = [];
+    foreach($flujos as $flujo) {
+        $protecciones_data[$flujo] = get_option('mmc_protecciones_' . $flujo, []);
+    }
+    echo json_encode($protecciones_data);
+?>;
+var mmcRecubrimientos = <?php echo json_encode(get_option('mmc_recubrimientos', [])); ?>;
         var mmcTiposLente = <?php echo json_encode(get_option('mmc_tipos_lente', [])); ?>;
     </script>
     <?php
