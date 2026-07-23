@@ -6,6 +6,79 @@ function mmc_modal_optica_menu() {
     add_menu_page('Flujo de Lentes', 'Flujo de Lentes', 'manage_options', 'mmc_flujo_lentes', 'mmc_modal_optica_admin_page', 'dashicons-visibility', 56);
 }
 
+
+
+// Base compartida por Protección y Sub-Protección (mismos campos, sin paso_previo/sub_protecciones)
+function mmc_sanitize_nivel_base($p) {
+    return [
+        'nombre'           => sanitize_text_field($p['nombre'] ?? ''),
+        'precio_antes'     => floatval($p['precio_antes'] ?? 0),
+        'precio_ahora'     => floatval($p['precio_ahora'] ?? 0),
+        'imagen_url'       => esc_url_raw($p['imagen_url'] ?? ''),
+        'descripcion'      => wp_kses_post($p['descripcion'] ?? ''),
+        'tooltip_texto'    => sanitize_textarea_field($p['tooltip_texto'] ?? ''),
+        'tooltip_img'      => esc_url_raw($p['tooltip_img'] ?? ''),
+        'tags'             => mmc_sanitize_tags($p['tags'] ?? []),
+        'es_fotocromatico' => !empty($p['es_fotocromatico']) ? 1 : 0,
+        'colores'          => mmc_sanitize_colores($p['colores'] ?? []),
+        'indices'          => mmc_sanitize_indices($p['indices'] ?? []),
+    ];
+}
+
+
+function mmc_sanitize_tags($raw_tags) {
+    $out = [];
+    foreach (($raw_tags ?? []) as $t) {
+        if (!empty($t['texto'])) {
+            $out[] = [
+                'texto' => sanitize_text_field($t['texto']),
+                'color' => sanitize_text_field($t['color'] ?? 'mmc-tag-azul'),
+            ];
+        }
+    }
+    return $out;
+}
+
+function mmc_sanitize_indices($raw_indices) {
+    $out = [];
+    foreach (($raw_indices ?? []) as $idx) {
+        if (empty($idx['nombre'])) continue;
+        $out[] = [
+            'nombre'                    => sanitize_text_field($idx['nombre']),
+            'precio_antes'              => floatval($idx['precio_antes'] ?? 0),
+            'precio_ahora'              => floatval($idx['precio_ahora'] ?? 0),
+            'descripcion'               => sanitize_text_field($idx['descripcion'] ?? ''),
+            'imagen_url'                => esc_url_raw($idx['imagen_url'] ?? ''),
+            'titulo_svg'                => esc_url_raw($idx['titulo_svg'] ?? ''),
+            'titulo_img'                => esc_url_raw($idx['titulo_img'] ?? ''),
+            'tooltip_texto'             => sanitize_textarea_field($idx['tooltip_texto'] ?? ''),
+            'tooltip_img'               => esc_url_raw($idx['tooltip_img'] ?? ''),
+            'tags'                      => mmc_sanitize_tags($idx['tags'] ?? []),
+            'recubrimientos_ids'        => array_map('sanitize_text_field', (array)($idx['recubrimientos_ids'] ?? [])),
+            'recubrimiento_recomendado' => sanitize_text_field($idx['recubrimiento_recomendado'] ?? ''),
+        ];
+    }
+    return $out;
+}
+
+function mmc_sanitize_colores($raw_colores) {
+    $out = [];
+    foreach (($raw_colores ?? []) as $c) {
+        if (empty($c['nombre'])) continue;
+        $out[] = [
+            'nombre'     => sanitize_text_field($c['nombre']),
+            'tipo'       => (($c['tipo'] ?? 'solido') === 'degradado') ? 'degradado' : 'solido',
+            'hex1'       => sanitize_hex_color($c['hex1'] ?? '') ?: '#cccccc',
+            'hex2'       => sanitize_hex_color($c['hex2'] ?? '') ?: '',
+            'imagen_url' => esc_url_raw($c['imagen_url'] ?? ''),
+        ];
+    }
+    return $out;
+}
+
+
+
+
 function mmc_flujo_save() {
     if (!isset($_POST['mmc_flujo_save']) || !current_user_can('manage_options')) return false;
 
@@ -46,56 +119,500 @@ function mmc_flujo_save() {
         'despues_habilitado'  => isset($_POST['prescripcion_despues'])  ? 1 : 0,
     ]);
 
-    // Paquetes de lente por flujo
-    $flujos_paquetes = ['simple','cercana','progresivo','bifocal','sin_graduacion'];
-    foreach($flujos_paquetes as $flujo) {
-        $raw = $_POST['paquetes'][$flujo] ?? [];
-        $saved_paquetes = [];
-        foreach($raw as $p) {
-            if (empty($p['nombre'])) continue;
-            $tags = [];
-            foreach(($p['tags'] ?? []) as $t) {
-                if (!empty($t['texto'])) {
-                    $tags[] = [
-                        'texto' => sanitize_text_field($t['texto']),
-                        'color' => sanitize_text_field($t['color'] ?? 'mmc-tag-azul'),
-                    ];
-                }
-            }
-            $saved_paquetes[] = [
-                'nombre'        => sanitize_text_field($p['nombre']),
-                'precio_antes'  => floatval($p['precio_antes'] ?? 0),
-                'precio_ahora'  => floatval($p['precio_ahora'] ?? 0),
-                'imagen_url'    => esc_url_raw($p['imagen_url'] ?? ''),
-                'descripcion'   => wp_kses_post($p['descripcion'] ?? ''),
-                'tooltip_texto' => sanitize_textarea_field($p['tooltip_texto'] ?? ''),
-                'tooltip_img'   => esc_url_raw($p['tooltip_img'] ?? ''),
-                'tags'          => $tags,
-            ];
-        }
-        update_option('mmc_paquetes_' . $flujo, $saved_paquetes);
-    }
+// REEMPLAZAR POR:
 
-    // Tipos de lente (4 fijos, mismos para todos los flujos)
-    $raw_tipos = $_POST['tipos_lente'] ?? [];
-    $saved_tipos = [];
-    foreach($raw_tipos as $t) {
-        if (empty($t['nombre'])) continue;
-        $saved_tipos[] = [
-            'nombre'       => sanitize_text_field($t['nombre']),
-            'precio_antes' => floatval($t['precio_antes'] ?? 0),
-            'precio_ahora' => floatval($t['precio_ahora'] ?? 0),
-            'descripcion'  => sanitize_text_field($t['descripcion'] ?? ''),
-            'imagen_url'   => esc_url_raw($t['imagen_url'] ?? ''),
-            'titulo_svg'   => esc_url_raw($t['titulo_svg'] ?? ''),
-            'titulo_img'   => esc_url_raw($t['titulo_img'] ?? ''),
-            'tooltip_texto'=> sanitize_textarea_field($t['tooltip_texto'] ?? ''),
-            'tooltip_img'  => esc_url_raw($t['tooltip_img'] ?? ''),
+// AGREGAR JUSTO ANTES DE ESA LÍNEA:
+    // Recubrimientos globales (compartidos por todos los flujos/índices)
+    $raw_rec = $_POST['recubrimientos'] ?? [];
+    $saved_rec = [];
+    foreach ($raw_rec as $r) {
+        if (empty($r['nombre'])) continue;
+        $id = sanitize_text_field($r['id'] ?? '');
+        if (empty($id)) $id = 'rc_' . wp_generate_password(10, false);
+        $saved_rec[] = [
+            'id'            => $id,
+            'nombre'        => sanitize_text_field($r['nombre']),
+            'precio_antes'  => floatval($r['precio_antes'] ?? 0),
+            'precio_ahora'  => floatval($r['precio_ahora'] ?? 0),
+            'tooltip_texto' => sanitize_textarea_field($r['tooltip_texto'] ?? ''),
+            'tooltip_img'   => esc_url_raw($r['tooltip_img'] ?? ''),
+            'imagen_url'    => esc_url_raw($r['imagen_url'] ?? ''),
         ];
     }
-    update_option('mmc_tipos_lente', $saved_tipos);
+    update_option('mmc_recubrimientos', $saved_rec);
+
+    // Protecciones, Sub-Protecciones e Índices por flujo (estructura dinámica anidada)
+    $flujos_protecciones = ['simple','cercana','progresivo','bifocal','sin_graduacion'];
+    
+    foreach ($flujos_protecciones as $flujo) {
+        $raw = $_POST['protecciones'][$flujo] ?? [];
+        $saved = [];
+        foreach ($raw as $p) {
+            if (empty($p['nombre'])) continue;
+
+            $item = mmc_sanitize_nivel_base($p);
+            $item['paso_previo'] = !empty($p['paso_previo']) ? 1 : 0;
+
+            $subs = [];
+            foreach (($p['sub_protecciones'] ?? []) as $sp) {
+                if (empty($sp['nombre'])) continue;
+                $subs[] = mmc_sanitize_nivel_base($sp);
+            }
+            $item['sub_protecciones'] = $subs;
+
+            $saved[] = $item;
+        }
+        update_option('mmc_protecciones_' . $flujo, $saved);
+    }
 
     return true;
+}
+
+
+// BUSCAR Y ELIMINAR: las funciones mmc_admin_render_indice_row() y mmc_admin_render_proteccion_card() completas del mensaje anterior.
+
+// REEMPLAZAR POR TODO ESTE BLOQUE:
+
+// BUSCAR Y REEMPLAZAR toda la función mmc_admin_render_indice_row() por:
+
+function mmc_admin_render_indice_row($base_padre, $uid, $iid, $t = [], $colores_opts = [], $recubrimientos_globales = []) {
+    $u = $uid . '_' . $iid;
+    $base = $base_padre . "[indices][$iid]";
+    ob_start(); ?>
+    <div class="mmc-indice-row" data-iid="<?php echo esc_attr($iid); ?>">
+        <div class="mmc-indice-row-header">
+            <strong>Índice</strong>
+            <button type="button" class="mmc-remove-indice" title="Eliminar índice">&times;</button>
+        </div>
+        <div class="mmc-grid-3">
+            <div class="mmc-field">
+                <label>Nombre (ej: 1.50)</label>
+                <input type="text" name="<?php echo $base;?>[nombre]" value="<?php echo esc_attr($t['nombre'] ?? '');?>" placeholder="1.50">
+            </div>
+            <div class="mmc-field">
+                <label>Precio antes (tachado)</label>
+                <input type="number" step="0.01" min="0" name="<?php echo $base;?>[precio_antes]" value="<?php echo esc_attr($t['precio_antes'] ?? 0);?>">
+            </div>
+            <div class="mmc-field">
+                <label>Precio adicional (0 = sin costo)</label>
+                <input type="number" step="0.01" min="0" name="<?php echo $base;?>[precio_ahora]" value="<?php echo esc_attr($t['precio_ahora'] ?? 0);?>">
+            </div>
+        </div>
+        <div class="mmc-field" style="margin-bottom:14px;">
+            <label>Descripción corta</label>
+            <input type="text" name="<?php echo $base;?>[descripcion]" value="<?php echo esc_attr($t['descripcion'] ?? '');?>" placeholder="Ej: Lentes para uso cotidiano">
+        </div>
+        <div class="mmc-grid-2">
+            <div class="mmc-field">
+                <label>Imagen del lente</label>
+                <div class="mmc-img-row">
+                    <input type="text" name="<?php echo $base;?>[imagen_url]" id="idx_img_<?php echo $u;?>" value="<?php echo esc_attr($t['imagen_url'] ?? '');?>" placeholder="URL">
+                    <img class="mmc-img-preview <?php echo !empty($t['imagen_url'])?'visible':'';?>" src="<?php echo esc_url($t['imagen_url'] ?? '');?>" id="idx_img_prev_<?php echo $u;?>">
+                    <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#idx_img_<?php echo $u;?>" data-preview="#idx_img_prev_<?php echo $u;?>">Subir</button>
+                </div>
+            </div>
+            <div class="mmc-field">
+                <label>Imagen tooltip</label>
+                <div class="mmc-img-row">
+                    <input type="text" name="<?php echo $base;?>[tooltip_img]" id="idx_tip_<?php echo $u;?>" value="<?php echo esc_attr($t['tooltip_img'] ?? '');?>" placeholder="URL">
+                    <img class="mmc-img-preview <?php echo !empty($t['tooltip_img'])?'visible':'';?>" src="<?php echo esc_url($t['tooltip_img'] ?? '');?>" id="idx_tip_prev_<?php echo $u;?>">
+                    <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#idx_tip_<?php echo $u;?>" data-preview="#idx_tip_prev_<?php echo $u;?>">Subir</button>
+                </div>
+            </div>
+        </div>
+        <div class="mmc-field" style="margin-bottom:0;">
+            <label>Texto tooltip</label>
+            <textarea name="<?php echo $base;?>[tooltip_texto]"><?php echo esc_textarea($t['tooltip_texto'] ?? '');?></textarea>
+        </div>
+        <hr class="mmc-divider">
+        <p class="mmc-section-label">Título especial (logo SVG + imagen — para Transitions, opcional)</p>
+        <div class="mmc-grid-2">
+            <div class="mmc-field">
+                <label>Logo SVG</label>
+                <div class="mmc-img-row">
+                    <input type="text" name="<?php echo $base;?>[titulo_svg]" id="idx_svg_<?php echo $u;?>" value="<?php echo esc_attr($t['titulo_svg'] ?? '');?>" placeholder="URL">
+                    <img class="mmc-img-preview <?php echo !empty($t['titulo_svg'])?'visible':'';?>" src="<?php echo esc_url($t['titulo_svg'] ?? '');?>" id="idx_svg_prev_<?php echo $u;?>">
+                    <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#idx_svg_<?php echo $u;?>" data-preview="#idx_svg_prev_<?php echo $u;?>">Subir</button>
+                </div>
+            </div>
+            <div class="mmc-field">
+                <label>Imagen secundaria (Photochromic)</label>
+                <div class="mmc-img-row">
+                    <input type="text" name="<?php echo $base;?>[titulo_img]" id="idx_timg_<?php echo $u;?>" value="<?php echo esc_attr($t['titulo_img'] ?? '');?>" placeholder="URL">
+                    <img class="mmc-img-preview <?php echo !empty($t['titulo_img'])?'visible':'';?>" src="<?php echo esc_url($t['titulo_img'] ?? '');?>" id="idx_timg_prev_<?php echo $u;?>">
+                    <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#idx_timg_<?php echo $u;?>" data-preview="#idx_timg_prev_<?php echo $u;?>">Subir</button>
+                </div>
+            </div>
+        </div>
+
+        <hr class="mmc-divider">
+        <?php echo mmc_admin_render_tags_block($base, $t['tags'] ?? [], $colores_opts); ?>
+
+        <?php echo mmc_admin_render_recubrimientos_checklist($base, $t, $recubrimientos_globales); ?>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+function mmc_admin_render_color_row($base, $uid, $cid, $c = []) {
+    $u = $uid . '_' . $cid;
+    $tipo = $c['tipo'] ?? 'solido';
+    ob_start(); ?>
+    <div class="mmc-color-row" data-cid="<?php echo esc_attr($cid); ?>">
+        <button type="button" class="mmc-remove-color" title="Eliminar color">&times;</button>
+        <div class="mmc-field">
+            <label>Nombre del color</label>
+            <input type="text" name="<?php echo $base;?>[colores][<?php echo $cid;?>][nombre]" value="<?php echo esc_attr($c['nombre'] ?? '');?>" placeholder="Ej: Gris">
+        </div>
+        <div class="mmc-field">
+            <label>Tipo</label>
+            <select class="mmc-color-tipo-select" name="<?php echo $base;?>[colores][<?php echo $cid;?>][tipo]">
+                <option value="solido" <?php selected($tipo, 'solido'); ?>>Sólido</option>
+                <option value="degradado" <?php selected($tipo, 'degradado'); ?>>Degradado</option>
+            </select>
+        </div>
+        <div class="mmc-field">
+            <label>Color 1</label>
+            <input type="color" name="<?php echo $base;?>[colores][<?php echo $cid;?>][hex1]" value="<?php echo esc_attr($c['hex1'] ?? '#cccccc');?>">
+        </div>
+        <div class="mmc-field mmc-color-hex2" style="<?php echo ($tipo === 'degradado') ? '' : 'display:none;'; ?>">
+            <label>Color 2 (degradado)</label>
+            <input type="color" name="<?php echo $base;?>[colores][<?php echo $cid;?>][hex2]" value="<?php echo esc_attr($c['hex2'] ?? '#666666');?>">
+        </div>
+        <div class="mmc-field" style="flex:1.3;">
+            <label>Imagen (opcional, reemplaza el color plano)</label>
+            <div class="mmc-img-row">
+                <input type="text" name="<?php echo $base;?>[colores][<?php echo $cid;?>][imagen_url]" id="col_img_<?php echo $u;?>" value="<?php echo esc_attr($c['imagen_url'] ?? '');?>" placeholder="URL">
+                <img class="mmc-img-preview <?php echo !empty($c['imagen_url'])?'visible':'';?>" src="<?php echo esc_url($c['imagen_url'] ?? '');?>" id="col_img_prev_<?php echo $u;?>">
+                <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#col_img_<?php echo $u;?>" data-preview="#col_img_prev_<?php echo $u;?>">Subir</button>
+            </div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+function mmc_admin_render_fotocromatico_block($base, $uid, $p) {
+    $checked = !empty($p['es_fotocromatico']);
+    ob_start(); ?>
+    <div class="mmc-toggle-row mmc-foto-toggle-row">
+        <input type="checkbox" class="mmc-foto-checkbox" id="foto_<?php echo $uid;?>" name="<?php echo $base;?>[es_fotocromatico]" value="1" <?php checked($checked, true); ?>>
+        <label for="foto_<?php echo $uid;?>" style="flex:1;">
+            <strong>Es fotocromático / tintado (mostrar selector de color)</strong>
+            <span class="mmc-toggle-desc"> — Al seleccionarlo en el frontend, se despliega un selector de colores antes de continuar.</span>
+        </label>
+    </div>
+    <div class="mmc-colores-wrap" style="<?php echo $checked ? '' : 'display:none;'; ?>">
+        <p class="mmc-section-label">Colores disponibles</p>
+        <div class="mmc-colores-rows">
+            <?php
+            $colores = $p['colores'] ?? [];
+            foreach ($colores as $cid => $c) {
+                echo mmc_admin_render_color_row($base, $uid, $cid, $c);
+            }
+            ?>
+        </div>
+        <button type="button" class="button mmc-add-color" style="margin-top:8px;">+ Agregar color</button>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+function mmc_admin_render_subproteccion_card($flujo, $pid, $sid, $sp, $colores_opts, $num, $recubrimientos_globales) {
+    $base = "protecciones[$flujo][$pid][sub_protecciones][$sid]";
+    $uid  = $flujo . '_' . $pid . '_sub_' . $sid;
+    $tags = $sp['tags'] ?? [];
+    while (count($tags) < 3) $tags[] = ['texto'=>'','color'=>'mmc-tag-azul'];
+    ob_start(); ?>
+    <div class="mmc-card mmc-subproteccion-card" data-flujo="<?php echo esc_attr($flujo);?>" data-pid="<?php echo esc_attr($pid);?>" data-sid="<?php echo esc_attr($sid);?>" data-icounter="0" data-ccounter="0">
+        <div class="mmc-card-header">
+            <div class="mmc-card-num" style="background:#7c3aed;"><?php echo $num; ?></div>
+            <p class="mmc-card-title">Sub-Protección<?php if(!empty($sp['nombre'])): ?> — <span style="color:#2563eb;"><?php echo esc_html($sp['nombre']); ?></span><?php endif; ?></p>
+            <button type="button" class="mmc-remove-subproteccion">Eliminar</button>
+        </div>
+        <div class="mmc-card-body">
+            <div class="mmc-grid-3">
+                <div class="mmc-field">
+                    <label>Nombre</label>
+                    <input type="text" name="<?php echo $base;?>[nombre]" value="<?php echo esc_attr($sp['nombre'] ?? '');?>" placeholder="Ej: Gris intenso">
+                </div>
+                <div class="mmc-field">
+                    <label>Precio antes (tachado)</label>
+                    <input type="number" step="0.01" min="0" name="<?php echo $base;?>[precio_antes]" value="<?php echo esc_attr($sp['precio_antes'] ?? 0);?>">
+                </div>
+                <div class="mmc-field">
+                    <label>Precio adicional (0 = Gratis)</label>
+                    <input type="number" step="0.01" min="0" name="<?php echo $base;?>[precio_ahora]" value="<?php echo esc_attr($sp['precio_ahora'] ?? 0);?>">
+                </div>
+            </div>
+            <div class="mmc-grid-2">
+                <div class="mmc-field">
+                    <label>Imagen</label>
+                    <div class="mmc-img-row">
+                        <input type="text" name="<?php echo $base;?>[imagen_url]" id="sub_img_<?php echo $uid;?>" value="<?php echo esc_attr($sp['imagen_url'] ?? '');?>" placeholder="URL">
+                        <img class="mmc-img-preview <?php echo !empty($sp['imagen_url'])?'visible':'';?>" src="<?php echo esc_url($sp['imagen_url'] ?? '');?>" id="sub_img_prev_<?php echo $uid;?>">
+                        <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#sub_img_<?php echo $uid;?>" data-preview="#sub_img_prev_<?php echo $uid;?>">Subir</button>
+                    </div>
+                </div>
+                <div class="mmc-field">
+                    <label>Descripción</label>
+                    <textarea name="<?php echo $base;?>[descripcion]"><?php echo esc_textarea($sp['descripcion'] ?? '');?></textarea>
+                </div>
+            </div>
+
+            <?php echo mmc_admin_render_fotocromatico_block($base, $uid, $sp); ?>
+
+// BUSCAR: 
+            <hr class="mmc-divider">
+            <?php echo mmc_admin_render_tags_block($base, $sp['tags'] ?? [], $colores_opts); ?>
+
+            <hr class="mmc-divider">
+            <p class="mmc-section-label">Tooltip (?)</p>
+            <div class="mmc-grid-2">
+                <div class="mmc-field">
+                    <label>Texto</label>
+                    <textarea name="<?php echo $base;?>[tooltip_texto]"><?php echo esc_textarea($sp['tooltip_texto'] ?? '');?></textarea>
+                </div>
+                <div class="mmc-field">
+                    <label>Imagen</label>
+                    <div class="mmc-img-row">
+                        <input type="text" name="<?php echo $base;?>[tooltip_img]" id="sub_tip_<?php echo $uid;?>" value="<?php echo esc_attr($sp['tooltip_img'] ?? '');?>" placeholder="URL">
+                        <img class="mmc-img-preview <?php echo !empty($sp['tooltip_img'])?'visible':'';?>" src="<?php echo esc_url($sp['tooltip_img'] ?? '');?>" id="sub_tip_prev_<?php echo $uid;?>">
+                        <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#sub_tip_<?php echo $uid;?>" data-preview="#sub_tip_prev_<?php echo $uid;?>">Subir</button>
+                    </div>
+                </div>
+            </div>
+
+// REEMPLAZAR POR:
+            <hr class="mmc-divider">
+            <p class="mmc-section-label">Índices de esta sub-protección</p>
+            <div class="mmc-indices-wrap">
+                <?php foreach (($sp['indices'] ?? []) as $iid => $t) { echo mmc_admin_render_indice_row($base, $uid, $iid, $t, $colores_opts, $recubrimientos_globales); } ?>
+            </div>
+            <button type="button" class="button mmc-add-indice" style="margin-top:10px;">+ Agregar índice</button>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+function mmc_admin_render_proteccion_card($flujo, $pid, $p, $colores_opts, $num, $recubrimientos_globales) {
+    $base = "protecciones[$flujo][$pid]";
+    $uid  = $flujo . '_' . $pid;
+    $tags = $p['tags'] ?? [];
+    while (count($tags) < 3) $tags[] = ['texto'=>'','color'=>'mmc-tag-azul'];
+    $paso_previo = !empty($p['paso_previo']);
+    ?>
+    <div class="mmc-card mmc-proteccion-card" data-flujo="<?php echo esc_attr($flujo);?>" data-pid="<?php echo esc_attr($pid);?>" data-icounter="0" data-scounter="0" data-ccounter="0">
+        <div class="mmc-card-header">
+            <div class="mmc-card-num" style="background:#0891b2;"><?php echo $num; ?></div>
+            <p class="mmc-card-title">Protección<?php if(!empty($p['nombre'])): ?> — <span style="color:#2563eb;"><?php echo esc_html($p['nombre']); ?></span><?php endif; ?></p>
+            <button type="button" class="mmc-remove-proteccion">Eliminar protección</button>
+        </div>
+        <div class="mmc-card-body">
+            <div class="mmc-grid-3">
+                <div class="mmc-field">
+                    <label>Nombre de la protección</label>
+                    <input type="text" name="<?php echo $base;?>[nombre]" value="<?php echo esc_attr($p['nombre'] ?? '');?>" placeholder="Ej: Clear">
+                </div>
+                <div class="mmc-field">
+                    <label>Precio antes (tachado)</label>
+                    <input type="number" step="0.01" min="0" name="<?php echo $base;?>[precio_antes]" value="<?php echo esc_attr($p['precio_antes'] ?? 0);?>">
+                </div>
+                <div class="mmc-field">
+                    <label>Precio adicional (0 = Gratis)</label>
+                    <input type="number" step="0.01" min="0" name="<?php echo $base;?>[precio_ahora]" value="<?php echo esc_attr($p['precio_ahora'] ?? 0);?>">
+                </div>
+            </div>
+
+            <div class="mmc-grid-2">
+                <div class="mmc-field">
+                    <label>Imagen del lente</label>
+                    <div class="mmc-img-row">
+                        <input type="text" name="<?php echo $base;?>[imagen_url]" id="prot_img_<?php echo $uid;?>" value="<?php echo esc_attr($p['imagen_url'] ?? '');?>" placeholder="URL de imagen">
+                        <img class="mmc-img-preview <?php echo !empty($p['imagen_url'])?'visible':'';?>" src="<?php echo esc_url($p['imagen_url'] ?? '');?>" id="prot_img_prev_<?php echo $uid;?>">
+                        <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#prot_img_<?php echo $uid;?>" data-preview="#prot_img_prev_<?php echo $uid;?>">Subir</button>
+                    </div>
+                </div>
+                <div class="mmc-field">
+                    <label>Descripción (admite &lt;strong&gt;)</label>
+                    <textarea name="<?php echo $base;?>[descripcion]" placeholder="Ej: Protección contra luz azul..."><?php echo esc_textarea($p['descripcion'] ?? '');?></textarea>
+                </div>
+            </div>
+
+            <div class="mmc-toggle-row mmc-paso-previo-row">
+                <input type="checkbox" class="mmc-paso-previo-checkbox" id="paso_previo_<?php echo $uid;?>" name="<?php echo $base;?>[paso_previo]" value="1" <?php checked($paso_previo, true); ?>>
+                <label for="paso_previo_<?php echo $uid;?>" style="flex:1;">
+                    <strong>Tiene paso previo (Sub-Protección)</strong>
+                    <span class="mmc-toggle-desc"> — Si se marca, se muestra una segunda pantalla de opciones (mismo diseño) antes de llegar a Índices.</span>
+                </label>
+            </div>
+
+            <?php echo mmc_admin_render_fotocromatico_block($base, $uid, $p); ?>
+
+            <hr class="mmc-divider">
+            <?php echo mmc_admin_render_tags_block($base, $p['tags'] ?? [], $colores_opts); ?>
+
+            <hr class="mmc-divider">
+            <p class="mmc-section-label">Tooltip (?)</p>
+            <div class="mmc-grid-2">
+                <div class="mmc-field">
+                    <label>Texto del tooltip</label>
+                    <textarea name="<?php echo $base;?>[tooltip_texto]"><?php echo esc_textarea($p['tooltip_texto'] ?? '');?></textarea>
+                </div>
+                <div class="mmc-field">
+                    <label>Imagen del tooltip</label>
+                    <div class="mmc-img-row">
+                        <input type="text" name="<?php echo $base;?>[tooltip_img]" id="prot_tip_<?php echo $uid;?>" value="<?php echo esc_attr($p['tooltip_img'] ?? '');?>" placeholder="URL">
+                        <img class="mmc-img-preview <?php echo !empty($p['tooltip_img'])?'visible':'';?>" src="<?php echo esc_url($p['tooltip_img'] ?? '');?>" id="prot_tip_prev_<?php echo $uid;?>">
+                        <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#prot_tip_<?php echo $uid;?>" data-preview="#prot_tip_prev_<?php echo $uid;?>">Subir</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOQUE SUB-PROTECCIONES (visible solo si paso_previo está marcado) -->
+            <div class="mmc-subprotecciones-wrap" style="<?php echo $paso_previo ? '' : 'display:none;'; ?>">
+                <hr class="mmc-divider">
+                <p class="mmc-section-label">Sub-Protecciones</p>
+                <div class="mmc-subprotecciones-lista">
+                    <?php
+                    $num_sub = 1;
+                    foreach (($p['sub_protecciones'] ?? []) as $sid => $sp) {
+                        echo mmc_admin_render_subproteccion_card($flujo, $pid, $sid, $sp, $colores_opts, $num_sub, $recubrimientos_globales);
+                        $num_sub++;
+                    }
+                    ?>
+                </div>
+                <button type="button" class="button mmc-add-subproteccion" style="margin:10px 0 20px;">+ Agregar sub-protección</button>
+            </div>
+
+            <!-- BLOQUE ÍNDICES (visible solo si NO tiene paso previo) -->
+            <div class="mmc-indices-wrap-outer" style="<?php echo $paso_previo ? 'display:none;' : ''; ?>">
+                <hr class="mmc-divider">
+                <p class="mmc-section-label">Índices de esta protección</p>
+                <div class="mmc-indices-wrap">
+                    <?php foreach (($p['indices'] ?? []) as $iid => $t) { echo mmc_admin_render_indice_row($base, $uid, $iid, $t, $colores_opts, $recubrimientos_globales); } ?>
+                </div>
+                <button type="button" class="button mmc-add-indice" style="margin-top:10px;">+ Agregar índice</button>
+            </div>
+        </div>
+    </div>
+    <?php
+}
+
+
+function mmc_admin_render_tag_row($base, $tid, $tag, $colores_opts) {
+    ob_start(); ?>
+    <div class="mmc-tag-row" data-tid="<?php echo esc_attr($tid); ?>">
+        <div class="mmc-field" style="margin:0; min-width:160px;">
+            <label>Texto</label>
+            <input type="text" name="<?php echo $base;?>[tags][<?php echo $tid;?>][texto]" value="<?php echo esc_attr($tag['texto'] ?? '');?>" placeholder="Ej: Lens protection">
+        </div>
+        <div class="mmc-field" style="margin:0; min-width:110px;">
+            <label>Color</label>
+            <select name="<?php echo $base;?>[tags][<?php echo $tid;?>][color]">
+                <?php foreach($colores_opts as $cval => $clabel): ?>
+                <option value="<?php echo $cval;?>" <?php selected($tag['color']??'mmc-tag-azul', $cval); ?>><?php echo $clabel; ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <button type="button" class="mmc-remove-tag" title="Eliminar tag">&times;</button>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+function mmc_admin_render_tags_block($base, $tags, $colores_opts) {
+    ob_start(); ?>
+    <p class="mmc-section-label">Tags de beneficios (ilimitados)</p>
+    <div class="mmc-tags-wrap" data-base="<?php echo esc_attr($base); ?>" data-tcounter="<?php echo max(0, count($tags)) - 1; ?>">
+        <?php foreach ($tags as $tid => $tag) { echo mmc_admin_render_tag_row($base, $tid, $tag, $colores_opts); } ?>
+    </div>
+    <button type="button" class="button mmc-add-tag" style="margin:8px 0 14px;">+ Agregar tag</button>
+    <?php
+    return ob_get_clean();
+}
+
+
+function mmc_admin_render_recubrimientos_checklist($base, $t, $recubrimientos_globales) {
+    $selected_ids = (array)($t['recubrimientos_ids'] ?? []);
+    $recomendado  = $t['recubrimiento_recomendado'] ?? '';
+    ob_start(); ?>
+    <hr class="mmc-divider">
+    <p class="mmc-section-label">Recubrimientos disponibles para este índice</p>
+    <?php if (empty($recubrimientos_globales)): ?>
+        <p class="mmc-hint">Aún no has creado Recubrimientos globales. Sube al inicio de la página y agrega al menos uno.</p>
+    <?php else: ?>
+    <div class="mmc-recub-checklist">
+        <?php foreach ($recubrimientos_globales as $r): $rid = $r['id']; $checked = in_array($rid, $selected_ids); ?>
+        <div class="mmc-recub-check-row">
+            <label class="mmc-recub-enable-label">
+                <input type="checkbox" name="<?php echo $base;?>[recubrimientos_ids][]" value="<?php echo esc_attr($rid); ?>" <?php checked($checked, true); ?>>
+                <?php echo esc_html($r['nombre']); ?>
+            </label>
+            <label class="mmc-recub-recomendado-label">
+                <input type="radio" name="<?php echo $base;?>[recubrimiento_recomendado]" value="<?php echo esc_attr($rid); ?>" <?php checked($recomendado, $rid); ?>>
+                Recomendado
+            </label>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+    <?php
+    return ob_get_clean();
+}
+
+function mmc_admin_render_recubrimiento_row($rid, $r = []) {
+    $id = !empty($r['id']) ? $r['id'] : ('rc_' . wp_generate_password(10, false));
+    ob_start(); ?>
+    <div class="mmc-card mmc-recubrimiento-card" data-rid="<?php echo esc_attr($rid); ?>">
+        <div class="mmc-card-header">
+            <div class="mmc-card-num" style="background:#ea580c;"><?php echo intval($rid) + 1; ?></div>
+            <p class="mmc-card-title">Recubrimiento<?php if(!empty($r['nombre'])): ?> — <span style="color:#2563eb;"><?php echo esc_html($r['nombre']); ?></span><?php endif; ?></p>
+            <button type="button" class="mmc-remove-recubrimiento">Eliminar</button>
+        </div>
+        <div class="mmc-card-body">
+            <input type="hidden" name="recubrimientos[<?php echo $rid;?>][id]" value="<?php echo esc_attr($id); ?>">
+            <div class="mmc-grid-3">
+                <div class="mmc-field">
+                    <label>Nombre</label>
+                    <input type="text" name="recubrimientos[<?php echo $rid;?>][nombre]" value="<?php echo esc_attr($r['nombre'] ?? '');?>" placeholder="Ej: Antirreflejo">
+                </div>
+                <div class="mmc-field">
+                    <label>Precio antes (tachado)</label>
+                    <input type="number" step="0.01" min="0" name="recubrimientos[<?php echo $rid;?>][precio_antes]" value="<?php echo esc_attr($r['precio_antes'] ?? 0);?>">
+                </div>
+                <div class="mmc-field">
+                    <label>Precio adicional (0 = Gratis)</label>
+                    <input type="number" step="0.01" min="0" name="recubrimientos[<?php echo $rid;?>][precio_ahora]" value="<?php echo esc_attr($r['precio_ahora'] ?? 0);?>">
+                </div>
+            </div>
+            <div class="mmc-grid-2">
+                <div class="mmc-field">
+                    <label>Imagen (se muestra a la derecha)</label>
+                    <div class="mmc-img-row">
+                        <input type="text" name="recubrimientos[<?php echo $rid;?>][imagen_url]" id="rec_img_<?php echo $rid;?>" value="<?php echo esc_attr($r['imagen_url'] ?? '');?>" placeholder="URL">
+                        <img class="mmc-img-preview <?php echo !empty($r['imagen_url'])?'visible':'';?>" src="<?php echo esc_url($r['imagen_url'] ?? '');?>" id="rec_img_prev_<?php echo $rid;?>">
+                        <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#rec_img_<?php echo $rid;?>" data-preview="#rec_img_prev_<?php echo $rid;?>">Subir</button>
+                    </div>
+                </div>
+                <div class="mmc-field">
+                    <label>Texto tooltip</label>
+                    <textarea name="recubrimientos[<?php echo $rid;?>][tooltip_texto]"><?php echo esc_textarea($r['tooltip_texto'] ?? '');?></textarea>
+                </div>
+            </div>
+            <div class="mmc-field" style="max-width:500px;">
+                <label>Imagen tooltip</label>
+                <div class="mmc-img-row">
+                    <input type="text" name="recubrimientos[<?php echo $rid;?>][tooltip_img]" id="rec_tip_<?php echo $rid;?>" value="<?php echo esc_attr($r['tooltip_img'] ?? '');?>" placeholder="URL">
+                    <img class="mmc-img-preview <?php echo !empty($r['tooltip_img'])?'visible':'';?>" src="<?php echo esc_url($r['tooltip_img'] ?? '');?>" id="rec_tip_prev_<?php echo $rid;?>">
+                    <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#rec_tip_<?php echo $rid;?>" data-preview="#rec_tip_prev_<?php echo $rid;?>">Subir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
 }
 
 function mmc_modal_optica_admin_page() {
@@ -152,6 +669,35 @@ function mmc_modal_optica_admin_page() {
         #mmc-flujo-wrap .mmc-toggle-row { display:flex; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid #f1f5f9; }
         #mmc-flujo-wrap .mmc-toggle-row label { font-size:13px; color:#374151; cursor:pointer; flex:1; }
         #mmc-flujo-wrap .mmc-toggle-row .mmc-toggle-desc { font-size:12px; color:#94a3b8; }
+        #mmc-flujo-wrap .mmc-proteccion-card { border-color: #0891b2; }
+#mmc-flujo-wrap .mmc-indices-wrap { display:flex; flex-direction:column; gap:12px; margin-top:10px; }
+#mmc-flujo-wrap .mmc-indice-row { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px 16px; }
+#mmc-flujo-wrap .mmc-indice-row-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+#mmc-flujo-wrap .mmc-indice-row-header strong { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:#64748b; }
+#mmc-flujo-wrap .mmc-remove-indice { background:#fee2e2; color:#b91c1c; border:none; border-radius:6px; width:22px; height:22px; font-size:14px; cursor:pointer; line-height:1; }
+#mmc-flujo-wrap .mmc-remove-proteccion { margin-left:auto; background:#fee2e2; color:#b91c1c; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+#mmc-flujo-wrap .mmc-paso-previo-row { border:1px solid #fde68a; background:#fffbeb; border-radius:8px; padding:12px 14px; margin-bottom:10px; }
+#mmc-flujo-wrap .mmc-subproteccion-card { border-color:#7c3aed; margin-left:20px; background:#fbfaff; }
+#mmc-flujo-wrap .mmc-remove-subproteccion { margin-left:auto; background:#fee2e2; color:#b91c1c; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; }
+#mmc-flujo-wrap .mmc-foto-toggle-row { border:1px solid #c4b5fd; background:#f5f3ff; border-radius:8px; padding:12px 14px; margin-bottom:10px; }
+#mmc-flujo-wrap .mmc-colores-wrap { background:#faf9ff; border:1px dashed #c4b5fd; border-radius:8px; padding:14px; margin-bottom:14px; }
+#mmc-flujo-wrap .mmc-color-row { display:flex; gap:12px; align-items:flex-end; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:10px; position:relative; }
+#mmc-flujo-wrap .mmc-color-row .mmc-field { margin-bottom:0; }
+#mmc-flujo-wrap .mmc-color-row input[type="color"] { height:36px; width:52px; padding:2px; cursor:pointer; }
+#mmc-flujo-wrap .mmc-remove-color { position:absolute; top:6px; right:8px; background:#fee2e2; color:#b91c1c; border:none; border-radius:50%; width:20px; height:20px; font-size:13px; cursor:pointer; line-height:1; }
+#mmc-flujo-wrap .mmc-subprotecciones-lista { display:flex; flex-direction:column; gap:14px; }
+
+#mmc-flujo-wrap .mmc-tags-wrap { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+#mmc-flujo-wrap .mmc-tag-row { display:flex; gap:6px; align-items:flex-end; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; }
+#mmc-flujo-wrap .mmc-tag-row select { height:36px; padding:0 8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px; }
+#mmc-flujo-wrap .mmc-remove-tag { background:#fee2e2; color:#b91c1c; border:none; border-radius:50%; width:24px; height:24px; font-size:14px; cursor:pointer; flex-shrink:0; }
+#mmc-flujo-wrap .mmc-recubrimiento-card { border-color:#ea580c; }
+#mmc-flujo-wrap .mmc-remove-recubrimiento { margin-left:auto; background:#fee2e2; color:#b91c1c; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; }
+#mmc-flujo-wrap .mmc-recub-checklist { display:flex; flex-direction:column; gap:6px; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:12px 14px; }
+#mmc-flujo-wrap .mmc-recub-check-row { display:flex; align-items:center; gap:20px; font-size:13px; padding:4px 0; border-bottom:1px dashed #fed7aa; }
+#mmc-flujo-wrap .mmc-recub-check-row:last-child { border-bottom:none; }
+#mmc-flujo-wrap .mmc-recub-enable-label { flex:1; display:flex; align-items:center; gap:6px; font-weight:600; }
+#mmc-flujo-wrap .mmc-recub-recomendado-label { display:flex; align-items:center; gap:6px; color:#c2410c; font-weight:600; }
     </style>
 
     <div id="mmc-flujo-wrap">
@@ -308,228 +854,429 @@ function mmc_modal_optica_admin_page() {
                 </div>
             </div>
 
-            <!-- ===== PAQUETES DE LENTE POR FLUJO ===== -->
+ 
+ <!-- REEMPLAZAR POR: -->
+            <!-- ===== PROTECCIONES E ÍNDICES POR FLUJO ===== -->
+            <!-- ===== RECUBRIMIENTOS (GLOBAL) ===== -->
+            <p class="mmc-section-titulo">Recubrimientos (Global)</p>
+            <p style="font-size:13px;color:#64748b;margin:-8px 0 16px;">Crea aquí todos los recubrimientos disponibles. Luego, dentro de cada Índice, eliges cuáles aplican y cuál es el recomendado. Recuerda crear uno tipo "Sin recubrimiento" con precio 0 (se mostrará como "Gratis").</p>
+            <?php
+            $recubrimientos_globales = get_option('mmc_recubrimientos', []);
+            ?>
+            <div class="mmc-recubrimientos-wrap" id="mmc-recubrimientos-wrap" data-counter="<?php echo count($recubrimientos_globales) - 1; ?>">
+                <?php foreach ($recubrimientos_globales as $rid => $r): ?>
+                    <?php echo mmc_admin_render_recubrimiento_row($rid, $r); ?>
+                <?php endforeach; ?>
+            </div>
+            <button type="button" class="button button-primary mmc-add-recubrimiento" style="margin-bottom:30px;">+ Agregar recubrimiento</button>
+
+            <!-- ===== PROTECCIONES E ÍNDICES POR FLUJO ===== -->
             <?php
             $flujos_config = [
-                'simple'        => 'Visión Simple',
-                'cercana'       => 'Visión Cercana',
-                'progresivo'    => 'Progresivo',
-                'bifocal'       => 'Bifocal',
-                'sin_graduacion'=> 'Sin Graduación',
+                'simple'         => 'Visión Simple',
+                'cercana'        => 'Visión Cercana',
+                'progresivo'     => 'Progresivo',
+                'bifocal'        => 'Bifocal',
+                'sin_graduacion' => 'Sin Graduación',
             ];
             $colores_opts = [
-                'mmc-tag-azul'   => 'Azul',
-                'mmc-tag-verde'  => 'Verde',
-                'mmc-tag-naranja'=> 'Naranja',
-                'mmc-tag-gris'   => 'Gris',
-                'mmc-tag-morado' => 'Morado',
+                'mmc-tag-azul'    => 'Azul',
+                'mmc-tag-verde'   => 'Verde',
+                'mmc-tag-naranja' => 'Naranja',
+                'mmc-tag-gris'    => 'Gris',
+                'mmc-tag-morado'  => 'Morado',
             ];
-            foreach($flujos_config as $flujo_key => $flujo_nombre):
-                $paquetes_flujo = get_option('mmc_paquetes_' . $flujo_key, []);
-                // Asegurar siempre 6 slots
-                while(count($paquetes_flujo) < 6) {
-                    $paquetes_flujo[] = ['nombre'=>'','precio_antes'=>0,'precio_ahora'=>0,'imagen_url'=>'','descripcion'=>'','tooltip_texto'=>'','tooltip_img'=>'','tags'=>[]];
+            foreach ($flujos_config as $flujo_key => $flujo_nombre):
+                $protecciones_flujo = get_option('mmc_protecciones_' . $flujo_key, []);
+                $max_pid = !empty($protecciones_flujo) ? max(array_keys($protecciones_flujo)) : -1;
+            ?>
+            <p class="mmc-section-titulo">Protecciones e Índices — <?php echo $flujo_nombre; ?></p>
+            <div class="mmc-protecciones-wrap" id="mmc-protecciones-wrap-<?php echo $flujo_key;?>" data-counter="<?php echo $max_pid; ?>">
+                <?php
+            $num = 1;
+            foreach ($protecciones_flujo as $pid => $p) {
+                    mmc_admin_render_proteccion_card($flujo_key, $pid, $p, $colores_opts, $num, $recubrimientos_globales);
+                    $num++;
                 }
             ?>
-            <p class="mmc-section-titulo">Paquetes de lente — <?php echo $flujo_nombre; ?></p>
+            </div>
+            <button type="button" class="button button-primary mmc-add-proteccion" data-flujo="<?php echo $flujo_key;?>" style="margin-bottom:30px;">+ Agregar protección</button>
+            <?php endforeach; ?>
 
-            <?php for($pi = 0; $pi < 6; $pi++):
-                $p    = $paquetes_flujo[$pi] ?? [];
-                $uid  = $flujo_key . '_' . $pi;
-                $tags = $p['tags'] ?? [];
-                while(count($tags) < 3) $tags[] = ['texto'=>'','color'=>'mmc-tag-azul'];
-            ?>
-            <div class="mmc-card mmc-paquete-admin-card">
+            <!-- ===== PLANTILLAS OCULTAS PARA AGREGAR DINÁMICAMENTE ===== -->
+            
+            <!-- AGREGAR, junto a las demás plantillas: -->
+<script type="text/template" id="tpl-tag">
+<div class="mmc-tag-row" data-tid="__TID__">
+    <div class="mmc-field" style="margin:0;min-width:160px;">
+        <label>Texto</label>
+        <input type="text" name="__BASE__[tags][__TID__][texto]" placeholder="Ej: Lens protection">
+    </div>
+    <div class="mmc-field" style="margin:0;min-width:110px;">
+        <label>Color</label>
+        <select name="__BASE__[tags][__TID__][color]">
+            <?php foreach ($colores_opts as $cval => $clabel): ?>
+            <option value="<?php echo $cval; ?>"><?php echo $clabel; ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <button type="button" class="mmc-remove-tag" title="Eliminar tag">&times;</button>
+</div>
+</script>
+
+<script type="text/template" id="tpl-recubrimiento">
+<div class="mmc-card mmc-recubrimiento-card" data-rid="__RID__">
+    <div class="mmc-card-header">
+        <div class="mmc-card-num" style="background:#ea580c;">__NUM__</div>
+        <p class="mmc-card-title">Recubrimiento (nuevo)</p>
+        <button type="button" class="mmc-remove-recubrimiento">Eliminar</button>
+    </div>
+    <div class="mmc-card-body">
+        <input type="hidden" name="recubrimientos[__RID__][id]" value="__NEWID__">
+        <div class="mmc-grid-3">
+            <div class="mmc-field">
+                <label>Nombre</label>
+                <input type="text" name="recubrimientos[__RID__][nombre]" placeholder="Ej: Antirreflejo">
+            </div>
+            <div class="mmc-field">
+                <label>Precio antes (tachado)</label>
+                <input type="number" step="0.01" min="0" name="recubrimientos[__RID__][precio_antes]" value="0">
+            </div>
+            <div class="mmc-field">
+                <label>Precio adicional (0 = Gratis)</label>
+                <input type="number" step="0.01" min="0" name="recubrimientos[__RID__][precio_ahora]" value="0">
+            </div>
+        </div>
+        <div class="mmc-grid-2">
+            <div class="mmc-field">
+                <label>Imagen (derecha)</label>
+                <div class="mmc-img-row">
+                    <input type="text" name="recubrimientos[__RID__][imagen_url]" id="rec_img___RID__" placeholder="URL">
+                    <img class="mmc-img-preview" src="" id="rec_img_prev___RID__">
+                    <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#rec_img___RID__" data-preview="#rec_img_prev___RID__">Subir</button>
+                </div>
+            </div>
+            <div class="mmc-field">
+                <label>Texto tooltip</label>
+                <textarea name="recubrimientos[__RID__][tooltip_texto]"></textarea>
+            </div>
+        </div>
+        <div class="mmc-field" style="max-width:500px;">
+            <label>Imagen tooltip</label>
+            <div class="mmc-img-row">
+                <input type="text" name="recubrimientos[__RID__][tooltip_img]" id="rec_tip___RID__" placeholder="URL">
+                <img class="mmc-img-preview" src="" id="rec_tip_prev___RID__">
+                <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#rec_tip___RID__" data-preview="#rec_tip_prev___RID__">Subir</button>
+            </div>
+        </div>
+    </div>
+</div>
+</script>
+            
+            <script type="text/template" id="tpl-proteccion">
+            <div class="mmc-card mmc-proteccion-card" data-flujo="__FLUJO__" data-pid="__PID__" data-icounter="0">
                 <div class="mmc-card-header">
-                    <div class="mmc-card-num" style="background:#0891b2;"><?php echo $pi + 1; ?></div>
-                    <p class="mmc-card-title">Paquete <?php echo $pi + 1; ?><?php if(!empty($p['nombre'])): ?> — <span style="color:#2563eb;"><?php echo esc_html($p['nombre']); ?></span><?php endif; ?></p>
-                    <span style="font-size:11px;color:#94a3b8;margin-left:auto;">Dejar nombre vacío para ocultar esta opción</span>
+                    <div class="mmc-card-num" style="background:#0891b2;">__NUM__</div>
+                    <p class="mmc-card-title">Protección (nueva)</p>
+                    <button type="button" class="mmc-remove-proteccion">Eliminar protección</button>
                 </div>
                 <div class="mmc-card-body">
-
-                    <!-- Fila 1: nombre, precio antes, precio ahora -->
                     <div class="mmc-grid-3">
                         <div class="mmc-field">
-                            <label>Nombre del paquete</label>
-                            <input type="text" name="paquetes[<?php echo $flujo_key;?>][<?php echo $pi;?>][nombre]" value="<?php echo esc_attr($p['nombre']??'');?>" placeholder="Ej: Estándar">
+                            <label>Nombre de la protección</label>
+                            <input type="text" name="protecciones[__FLUJO__][__PID__][nombre]" placeholder="Ej: Clear">
                         </div>
                         <div class="mmc-field">
                             <label>Precio antes (tachado)</label>
-                            <input type="number" step="0.01" min="0" name="paquetes[<?php echo $flujo_key;?>][<?php echo $pi;?>][precio_antes]" value="<?php echo esc_attr($p['precio_antes']??0);?>" placeholder="0.00">
-                            <p class="mmc-hint">0 = no mostrar tachado</p>
+                            <input type="number" step="0.01" min="0" name="protecciones[__FLUJO__][__PID__][precio_antes]" value="0">
                         </div>
                         <div class="mmc-field">
                             <label>Precio adicional (0 = Gratis)</label>
-                            <input type="number" step="0.01" min="0" name="paquetes[<?php echo $flujo_key;?>][<?php echo $pi;?>][precio_ahora]" value="<?php echo esc_attr($p['precio_ahora']??0);?>" placeholder="0.00">
+                            <input type="number" step="0.01" min="0" name="protecciones[__FLUJO__][__PID__][precio_ahora]" value="0">
                         </div>
                     </div>
-
-                    <!-- Fila 2: imagen, descripción -->
                     <div class="mmc-grid-2">
                         <div class="mmc-field">
                             <label>Imagen del lente</label>
                             <div class="mmc-img-row">
-                                <input type="text" name="paquetes[<?php echo $flujo_key;?>][<?php echo $pi;?>][imagen_url]" id="paq_img_<?php echo $uid;?>" value="<?php echo esc_attr($p['imagen_url']??'');?>" placeholder="URL de imagen">
-                                <img class="mmc-img-preview <?php echo !empty($p['imagen_url'])?'visible':'';?>" src="<?php echo esc_url($p['imagen_url']??'');?>" id="paq_img_prev_<?php echo $uid;?>">
-                                <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#paq_img_<?php echo $uid;?>" data-preview="#paq_img_prev_<?php echo $uid;?>">Subir</button>
+                                <input type="text" name="protecciones[__FLUJO__][__PID__][imagen_url]" id="prot_img___FLUJO_____PID__" placeholder="URL de imagen">
+                                <img class="mmc-img-preview" src="" id="prot_img_prev___FLUJO_____PID__">
+                                <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#prot_img___FLUJO_____PID__" data-preview="#prot_img_prev___FLUJO_____PID__">Subir</button>
                             </div>
                         </div>
                         <div class="mmc-field">
-                            <label>Descripción (admite &lt;strong&gt; para negritas)</label>
-                            <textarea name="paquetes[<?php echo $flujo_key;?>][<?php echo $pi;?>][descripcion]" placeholder="Ej: 1.5 Index Basic Lenses, &lt;strong&gt;Scratch Resistant&lt;/strong&gt;..."><?php echo esc_textarea($p['descripcion']??'');?></textarea>
+                            <label>Descripción (admite &lt;strong&gt;)</label>
+                            <textarea name="protecciones[__FLUJO__][__PID__][descripcion]" placeholder="Ej: Protección contra luz azul..."></textarea>
                         </div>
                     </div>
-
-                    <hr class="mmc-divider">
-
-                    <!-- Tags de beneficios (hasta 3) -->
-                    <p class="mmc-section-label">Tags de beneficios (hasta 3)</p>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
-                        <?php for($ti = 0; $ti < 3; $ti++):
-                            $tag = $tags[$ti] ?? ['texto'=>'','color'=>'mmc-tag-azul'];
-                        ?>
-                        <div style="display:flex; gap:6px; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px;">
-                            <div class="mmc-field" style="margin:0; min-width:140px;">
-                                <label>Texto</label>
-                                <input type="text" name="paquetes[<?php echo $flujo_key;?>][<?php echo $pi;?>][tags][<?php echo $ti;?>][texto]" value="<?php echo esc_attr($tag['texto']);?>" placeholder="Ej: Lens protection">
-                            </div>
-                            <div class="mmc-field" style="margin:0; min-width:110px;">
-                                <label>Color</label>
-                                <select name="paquetes[<?php echo $flujo_key;?>][<?php echo $pi;?>][tags][<?php echo $ti;?>][color]" style="height:36px;width:100%;padding:0 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
-                                    <?php foreach($colores_opts as $cval => $clabel): ?>
-                                    <option value="<?php echo $cval;?>" <?php selected($tag['color']??'mmc-tag-azul', $cval); ?>><?php echo $clabel; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                        <?php endfor; ?>
+                    <div class="mmc-toggle-row mmc-paso-previo-row">
+                        <input type="checkbox" id="paso_previo___FLUJO_____PID__" name="protecciones[__FLUJO__][__PID__][paso_previo]" value="1">
+                        <label for="paso_previo___FLUJO_____PID__" style="flex:1;">
+                            <strong>Tiene paso previo (aún no configurado)</strong>
+                            <span class="mmc-toggle-desc"> — Si se marca, esta protección mostrará "Próximamente" en vez de avanzar a Índices.</span>
+                        </label>
                     </div>
+                   
+                    <hr class="mmc-divider">
+                    <p class="mmc-section-label">Tags de beneficios (ilimitados)</p>
+                    <div class="mmc-tags-wrap" data-base="protecciones[__FLUJO__][__PID__]" data-tcounter="-1"></div>
+                    <button type="button" class="button mmc-add-tag" style="margin:8px 0 14px;">+ Agregar tag</button>
 
                     <hr class="mmc-divider">
-
-                    <!-- Tooltip -->
                     <p class="mmc-section-label">Tooltip (?)</p>
                     <div class="mmc-grid-2">
                         <div class="mmc-field">
                             <label>Texto del tooltip</label>
-                            <textarea name="paquetes[<?php echo $flujo_key;?>][<?php echo $pi;?>][tooltip_texto]" placeholder="Descripción breve al hacer clic en ?"><?php echo esc_textarea($p['tooltip_texto']??'');?></textarea>
+                            <textarea name="protecciones[__FLUJO__][__PID__][tooltip_texto]"></textarea>
                         </div>
                         <div class="mmc-field">
                             <label>Imagen del tooltip</label>
                             <div class="mmc-img-row">
-                                <input type="text" name="paquetes[<?php echo $flujo_key;?>][<?php echo $pi;?>][tooltip_img]" id="paq_tip_<?php echo $uid;?>" value="<?php echo esc_attr($p['tooltip_img']??'');?>" placeholder="URL">
-                                <img class="mmc-img-preview <?php echo !empty($p['tooltip_img'])?'visible':'';?>" src="<?php echo esc_url($p['tooltip_img']??'');?>" id="paq_tip_prev_<?php echo $uid;?>">
-                                <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#paq_tip_<?php echo $uid;?>" data-preview="#paq_tip_prev_<?php echo $uid;?>">Subir</button>
+                                <input type="text" name="protecciones[__FLUJO__][__PID__][tooltip_img]" id="prot_tip___FLUJO_____PID__" placeholder="URL">
+                                <img class="mmc-img-preview" src="" id="prot_tip_prev___FLUJO_____PID__">
+                                <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#prot_tip___FLUJO_____PID__" data-preview="#prot_tip_prev___FLUJO_____PID__">Subir</button>
                             </div>
                         </div>
                     </div>
 
+                    <div class="mmc-toggle-row mmc-foto-toggle-row">
+                        <input type="checkbox" class="mmc-foto-checkbox" id="foto___FLUJO_____PID__" name="protecciones[__FLUJO__][__PID__][es_fotocromatico]" value="1">
+                        <label for="foto___FLUJO_____PID__" style="flex:1;">
+                            <strong>Es fotocromático / tintado (mostrar selector de color)</strong>
+                            <span class="mmc-toggle-desc"> — Al seleccionarlo en el frontend, se despliega un selector de colores antes de continuar.</span>
+                        </label>
+                    </div>
+                    <div class="mmc-colores-wrap" style="display:none;">
+                        <p class="mmc-section-label">Colores disponibles</p>
+                        <div class="mmc-colores-rows"></div>
+                        <button type="button" class="button mmc-add-color" style="margin-top:8px;">+ Agregar color</button>
+                    </div>
+
+                    <div class="mmc-subprotecciones-wrap" style="display:none;">
+                        <hr class="mmc-divider">
+                        <p class="mmc-section-label">Sub-Protecciones</p>
+                        <div class="mmc-subprotecciones-lista"></div>
+                        <button type="button" class="button mmc-add-subproteccion" style="margin:10px 0 20px;">+ Agregar sub-protección</button>
+                    </div>
+
+                    <div class="mmc-indices-wrap-outer">
+                        <hr class="mmc-divider">
+                        <p class="mmc-section-label">Índices de esta protección</p>
+                        <div class="mmc-indices-wrap"></div>
+                        <button type="button" class="button mmc-add-indice" style="margin-top:10px;">+ Agregar índice</button>
+                    </div>
+
                 </div>
             </div>
-            <?php endfor; ?>
-            <?php endforeach; ?>
+            </script>
 
-            <!-- ===== TIPOS DE LENTE (4 opciones, iguales para todos los flujos) ===== -->
-            <p class="mmc-section-titulo">Tipos de lente — Paso 4</p>
-            <p style="font-size:13px;color:#64748b;margin:-8px 0 16px;">Estas 4 opciones aparecen igual para todos los flujos. Para Progresivo Office solo se muestran las 2 primeras (Clear + Blue Light).</p>
-
-            <?php
-            $tipos_default = [
-                ['nombre'=>'Clear',       'precio_antes'=>0,'precio_ahora'=>0,'descripcion'=>'Lentes para uso cotidiano',                              'imagen_url'=>'','titulo_svg'=>'','titulo_img'=>'','tooltip_texto'=>'','tooltip_img'=>''],
-                ['nombre'=>'Blue Light',  'precio_antes'=>0,'precio_ahora'=>0,'descripcion'=>'Protege tus ojos de dispositivos digitales',             'imagen_url'=>'','titulo_svg'=>'','titulo_img'=>'','tooltip_texto'=>'','tooltip_img'=>''],
-                ['nombre'=>'Transitions', 'precio_antes'=>0,'precio_ahora'=>0,'descripcion'=>'Se oscurecen al exterior, se aclaran al interior',       'imagen_url'=>'','titulo_svg'=>'','titulo_img'=>'','tooltip_texto'=>'','tooltip_img'=>''],
-                ['nombre'=>'Sunglasses',  'precio_antes'=>0,'precio_ahora'=>0,'descripcion'=>'Tintados, espejados o polarizados',                      'imagen_url'=>'','titulo_svg'=>'','titulo_img'=>'','tooltip_texto'=>'','tooltip_img'=>''],
-            ];
-            $tipos_lente = get_option('mmc_tipos_lente', $tipos_default);
-            while(count($tipos_lente) < 4) $tipos_lente[] = end($tipos_default);
-            $tipo_labels = ['1 — Clear (siempre visible)', '2 — Blue Light (siempre visible)', '3 — Transitions / Photochromic', '4 — Sunglasses'];
-            ?>
-
-            <?php for($ti = 0; $ti < 4; $ti++):
-                $t   = $tipos_lente[$ti] ?? [];
-                $uid = 'tipo_' . $ti;
-            ?>
-            <div class="mmc-card">
-                <div class="mmc-card-header">
-                    <div class="mmc-card-num" style="background:#7c3aed;"><?php echo $ti+1; ?></div>
-                    <p class="mmc-card-title"><?php echo $tipo_labels[$ti]; ?></p>
-                    <?php if($ti < 2): ?><span style="font-size:11px;color:#16a34a;margin-left:auto;">✓ Siempre visible (incluso en Progresivo Office)</span><?php endif; ?>
+            <script type="text/template" id="tpl-indice">
+            <div class="mmc-indice-row" data-iid="__IID__">
+                <div class="mmc-indice-row-header">
+                    <strong>Índice</strong>
+                    <button type="button" class="mmc-remove-indice" title="Eliminar índice">&times;</button>
                 </div>
-                <div class="mmc-card-body">
-
-                    <div class="mmc-grid-3">
-                        <div class="mmc-field">
-                            <label>Nombre</label>
-                            <input type="text" name="tipos_lente[<?php echo $ti;?>][nombre]" value="<?php echo esc_attr($t['nombre']??'');?>" placeholder="Ej: Clear">
-                        </div>
-                        <div class="mmc-field">
-                            <label>Precio antes (tachado)</label>
-                            <input type="number" step="0.01" min="0" name="tipos_lente[<?php echo $ti;?>][precio_antes]" value="<?php echo esc_attr($t['precio_antes']??0);?>" placeholder="0.00">
-                        </div>
-                        <div class="mmc-field">
-                            <label>Precio adicional (0 = sin costo)</label>
-                            <input type="number" step="0.01" min="0" name="tipos_lente[<?php echo $ti;?>][precio_ahora]" value="<?php echo esc_attr($t['precio_ahora']??0);?>" placeholder="0.00">
-                        </div>
+                <div class="mmc-grid-3">
+                    <div class="mmc-field">
+                        <label>Nombre (ej: 1.50)</label>
+                        <input type="text" name="protecciones[__FLUJO__][__PID__][indices][__IID__][nombre]" placeholder="1.50">
                     </div>
-
-                    <div class="mmc-field" style="max-width:100%;margin-bottom:14px;">
-                        <label>Descripción corta</label>
-                        <input type="text" name="tipos_lente[<?php echo $ti;?>][descripcion]" value="<?php echo esc_attr($t['descripcion']??'');?>" placeholder="Ej: Lentes para uso cotidiano">
+                    <div class="mmc-field">
+                        <label>Precio antes (tachado)</label>
+                        <input type="number" step="0.01" min="0" name="protecciones[__FLUJO__][__PID__][indices][__IID__][precio_antes]" value="0">
                     </div>
-
-                    <hr class="mmc-divider">
-                    <p class="mmc-section-label">Imagen del lente (derecha de la card)</p>
-                    <div class="mmc-field" style="max-width:500px;margin-bottom:14px;">
-                        <label>Imagen principal</label>
+                    <div class="mmc-field">
+                        <label>Precio adicional (0 = sin costo)</label>
+                        <input type="number" step="0.01" min="0" name="protecciones[__FLUJO__][__PID__][indices][__IID__][precio_ahora]" value="0">
+                    </div>
+                </div>
+                <div class="mmc-field" style="margin-bottom:14px;">
+                    <label>Descripción corta</label>
+                    <input type="text" name="protecciones[__FLUJO__][__PID__][indices][__IID__][descripcion]" placeholder="Ej: Lentes para uso cotidiano">
+                </div>
+                <div class="mmc-grid-2">
+                    <div class="mmc-field">
+                        <label>Imagen del lente</label>
                         <div class="mmc-img-row">
-                            <input type="text" name="tipos_lente[<?php echo $ti;?>][imagen_url]" id="tipo_img_<?php echo $uid;?>" value="<?php echo esc_attr($t['imagen_url']??'');?>" placeholder="URL">
-                            <img class="mmc-img-preview <?php echo !empty($t['imagen_url'])?'visible':'';?>" src="<?php echo esc_url($t['imagen_url']??'');?>" id="tipo_img_prev_<?php echo $uid;?>">
-                            <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#tipo_img_<?php echo $uid;?>" data-preview="#tipo_img_prev_<?php echo $uid;?>">Subir</button>
+                            <input type="text" name="protecciones[__FLUJO__][__PID__][indices][__IID__][imagen_url]" id="idx_img___FLUJO_____PID_____IID__" placeholder="URL">
+                            <img class="mmc-img-preview" src="" id="idx_img_prev___FLUJO_____PID_____IID__">
+                            <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#idx_img___FLUJO_____PID_____IID__" data-preview="#idx_img_prev___FLUJO_____PID_____IID__">Subir</button>
                         </div>
                     </div>
-
-                    <hr class="mmc-divider">
-                    <p class="mmc-section-label">Título especial (para Transitions — logo SVG + imagen Photochromic)</p>
-                    <p class="mmc-hint" style="margin-bottom:12px;">Si rellenas estos campos, el título mostrará las imágenes en vez del texto. Dejar vacío para usar solo el nombre.</p>
-                    <div class="mmc-grid-2">
-                        <div class="mmc-field">
-                            <label>Logo SVG / imagen izquierda del título</label>
-                            <div class="mmc-img-row">
-                                <input type="text" name="tipos_lente[<?php echo $ti;?>][titulo_svg]" id="tipo_svg_<?php echo $uid;?>" value="<?php echo esc_attr($t['titulo_svg']??'');?>" placeholder="URL del logo">
-                                <img class="mmc-img-preview <?php echo !empty($t['titulo_svg'])?'visible':'';?>" src="<?php echo esc_url($t['titulo_svg']??'');?>" id="tipo_svg_prev_<?php echo $uid;?>">
-                                <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#tipo_svg_<?php echo $uid;?>" data-preview="#tipo_svg_prev_<?php echo $uid;?>">Subir</button>
-                            </div>
-                        </div>
-                        <div class="mmc-field">
-                            <label>Imagen derecha del título (Photochromic)</label>
-                            <div class="mmc-img-row">
-                                <input type="text" name="tipos_lente[<?php echo $ti;?>][titulo_img]" id="tipo_timg_<?php echo $uid;?>" value="<?php echo esc_attr($t['titulo_img']??'');?>" placeholder="URL de la imagen">
-                                <img class="mmc-img-preview <?php echo !empty($t['titulo_img'])?'visible':'';?>" src="<?php echo esc_url($t['titulo_img']??'');?>" id="tipo_timg_prev_<?php echo $uid;?>">
-                                <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#tipo_timg_<?php echo $uid;?>" data-preview="#tipo_timg_prev_<?php echo $uid;?>">Subir</button>
-                            </div>
+                    <div class="mmc-field">
+                        <label>Imagen tooltip</label>
+                        <div class="mmc-img-row">
+                            <input type="text" name="protecciones[__FLUJO__][__PID__][indices][__IID__][tooltip_img]" id="idx_tip___FLUJO_____PID_____IID__" placeholder="URL">
+                            <img class="mmc-img-preview" src="" id="idx_tip_prev___FLUJO_____PID_____IID__">
+                            <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#idx_tip___FLUJO_____PID_____IID__" data-preview="#idx_tip_prev___FLUJO_____PID_____IID__">Subir</button>
                         </div>
                     </div>
-
-                    <hr class="mmc-divider">
-                    <p class="mmc-section-label">Tooltip (?)</p>
-                    <div class="mmc-grid-2">
-                        <div class="mmc-field">
-                            <label>Texto del tooltip</label>
-                            <textarea name="tipos_lente[<?php echo $ti;?>][tooltip_texto]" placeholder="Descripción que aparece al hacer clic en ?"><?php echo esc_textarea($t['tooltip_texto']??'');?></textarea>
-                        </div>
-                        <div class="mmc-field">
-                            <label>Imagen del tooltip</label>
-                            <div class="mmc-img-row">
-                                <input type="text" name="tipos_lente[<?php echo $ti;?>][tooltip_img]" id="tipo_tip_<?php echo $uid;?>" value="<?php echo esc_attr($t['tooltip_img']??'');?>" placeholder="URL">
-                                <img class="mmc-img-preview <?php echo !empty($t['tooltip_img'])?'visible':'';?>" src="<?php echo esc_url($t['tooltip_img']??'');?>" id="tipo_tip_prev_<?php echo $uid;?>">
-                                <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#tipo_tip_<?php echo $uid;?>" data-preview="#tipo_tip_prev_<?php echo $uid;?>">Subir</button>
-                            </div>
+                </div>
+                <div class="mmc-field" style="margin-bottom:0;">
+                    <label>Texto tooltip</label>
+                    <textarea name="protecciones[__FLUJO__][__PID__][indices][__IID__][tooltip_texto]"></textarea>
+                </div>
+                <hr class="mmc-divider">
+                <p class="mmc-section-label">Título especial (logo SVG + imagen — para Transitions, opcional)</p>
+                <div class="mmc-grid-2">
+                    <div class="mmc-field">
+                        <label>Logo SVG</label>
+                        <div class="mmc-img-row">
+                            <input type="text" name="protecciones[__FLUJO__][__PID__][indices][__IID__][titulo_svg]" id="idx_svg___FLUJO_____PID_____IID__" placeholder="URL">
+                            <img class="mmc-img-preview" src="" id="idx_svg_prev___FLUJO_____PID_____IID__">
+                            <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#idx_svg___FLUJO_____PID_____IID__" data-preview="#idx_svg_prev___FLUJO_____PID_____IID__">Subir</button>
                         </div>
                     </div>
+                    <div class="mmc-field">
+                        <label>Imagen secundaria (Photochromic)</label>
+                        <div class="mmc-img-row">
+                            <input type="text" name="protecciones[__FLUJO__][__PID__][indices][__IID__][titulo_img]" id="idx_timg___FLUJO_____PID_____IID__" placeholder="URL">
+                            <img class="mmc-img-preview" src="" id="idx_timg_prev___FLUJO_____PID_____IID__">
+                            <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#idx_timg___FLUJO_____PID_____IID__" data-preview="#idx_timg_prev___FLUJO_____PID_____IID__">Subir</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="mmc-divider">
+<p class="mmc-section-label">Tags de beneficios (ilimitados)</p>
+<div class="mmc-tags-wrap" data-base="protecciones[__FLUJO__][__PID__][indices][__IID__]" data-tcounter="-1"></div>
+<button type="button" class="button mmc-add-tag" style="margin:8px 0 14px;">+ Agregar tag</button>
 
+<hr class="mmc-divider">
+<p class="mmc-section-label">Recubrimientos disponibles para este índice</p>
+<?php if (empty($recubrimientos_globales)): ?>
+    <p class="mmc-hint">Aún no has creado Recubrimientos globales.</p>
+<?php else: ?>
+<div class="mmc-recub-checklist">
+    <?php foreach ($recubrimientos_globales as $r): ?>
+    <div class="mmc-recub-check-row">
+        <label class="mmc-recub-enable-label">
+            <input type="checkbox" name="protecciones[__FLUJO__][__PID__][indices][__IID__][recubrimientos_ids][]" value="<?php echo esc_attr($r['id']); ?>"> <?php echo esc_html($r['nombre']); ?>
+        </label>
+        <label class="mmc-recub-recomendado-label">
+            <input type="radio" name="protecciones[__FLUJO__][__PID__][indices][__IID__][recubrimiento_recomendado]" value="<?php echo esc_attr($r['id']); ?>"> Recomendado
+        </label>
+    </div>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
+                
+            </div>
+            </script>
+            
+            <script type="text/template" id="tpl-subproteccion">
+<div class="mmc-card mmc-subproteccion-card" data-flujo="__FLUJO__" data-pid="__PID__" data-sid="__SID__" data-icounter="0" data-ccounter="0">
+    <div class="mmc-card-header">
+        <div class="mmc-card-num" style="background:#7c3aed;">__NUM__</div>
+        <p class="mmc-card-title">Sub-Protección (nueva)</p>
+        <button type="button" class="mmc-remove-subproteccion">Eliminar</button>
+    </div>
+    <div class="mmc-card-body">
+        <div class="mmc-grid-3">
+            <div class="mmc-field">
+                <label>Nombre</label>
+                <input type="text" name="protecciones[__FLUJO__][__PID__][sub_protecciones][__SID__][nombre]" placeholder="Ej: Gris intenso">
+            </div>
+            <div class="mmc-field">
+                <label>Precio antes (tachado)</label>
+                <input type="number" step="0.01" min="0" name="protecciones[__FLUJO__][__PID__][sub_protecciones][__SID__][precio_antes]" value="0">
+            </div>
+            <div class="mmc-field">
+                <label>Precio adicional (0 = Gratis)</label>
+                <input type="number" step="0.01" min="0" name="protecciones[__FLUJO__][__PID__][sub_protecciones][__SID__][precio_ahora]" value="0">
+            </div>
+        </div>
+        <div class="mmc-grid-2">
+            <div class="mmc-field">
+                <label>Imagen</label>
+                <div class="mmc-img-row">
+                    <input type="text" name="protecciones[__FLUJO__][__PID__][sub_protecciones][__SID__][imagen_url]" id="sub_img___FLUJO_____PID_____SID__" placeholder="URL">
+                    <img class="mmc-img-preview" src="" id="sub_img_prev___FLUJO_____PID_____SID__">
+                    <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#sub_img___FLUJO_____PID_____SID__" data-preview="#sub_img_prev___FLUJO_____PID_____SID__">Subir</button>
                 </div>
             </div>
-            <?php endfor; ?>
+            <div class="mmc-field">
+                <label>Descripción</label>
+                <textarea name="protecciones[__FLUJO__][__PID__][sub_protecciones][__SID__][descripcion]"></textarea>
+            </div>
+        </div>
+
+        <div class="mmc-toggle-row mmc-foto-toggle-row">
+            <input type="checkbox" class="mmc-foto-checkbox" id="foto___FLUJO_____PID_____SID__" name="protecciones[__FLUJO__][__PID__][sub_protecciones][__SID__][es_fotocromatico]" value="1">
+            <label for="foto___FLUJO_____PID_____SID__" style="flex:1;">
+                <strong>Es fotocromático / tintado (mostrar selector de color)</strong>
+                <span class="mmc-toggle-desc"> — Al seleccionarlo en el frontend, se despliega un selector de colores antes de continuar.</span>
+            </label>
+        </div>
+        <div class="mmc-colores-wrap" style="display:none;">
+            <p class="mmc-section-label">Colores disponibles</p>
+            <div class="mmc-colores-rows"></div>
+            <button type="button" class="button mmc-add-color" style="margin-top:8px;">+ Agregar color</button>
+        </div>
+
+<hr class="mmc-divider">
+<p class="mmc-section-label">Tags de beneficios (ilimitados)</p>
+<div class="mmc-tags-wrap" data-base="protecciones[__FLUJO__][__PID__][sub_protecciones][__SID__]" data-tcounter="-1"></div>
+<button type="button" class="button mmc-add-tag" style="margin:8px 0 14px;">+ Agregar tag</button>
+
+        <hr class="mmc-divider">
+        <p class="mmc-section-label">Tooltip (?)</p>
+        <div class="mmc-grid-2">
+            <div class="mmc-field">
+                <label>Texto</label>
+                <textarea name="protecciones[__FLUJO__][__PID__][sub_protecciones][__SID__][tooltip_texto]"></textarea>
+            </div>
+            <div class="mmc-field">
+                <label>Imagen</label>
+                <div class="mmc-img-row">
+                    <input type="text" name="protecciones[__FLUJO__][__PID__][sub_protecciones][__SID__][tooltip_img]" id="sub_tip___FLUJO_____PID_____SID__" placeholder="URL">
+                    <img class="mmc-img-preview" src="" id="sub_tip_prev___FLUJO_____PID_____SID__">
+                    <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#sub_tip___FLUJO_____PID_____SID__" data-preview="#sub_tip_prev___FLUJO_____PID_____SID__">Subir</button>
+                </div>
+            </div>
+        </div>
+
+        <hr class="mmc-divider">
+        <p class="mmc-section-label">Índices de esta sub-protección</p>
+        <div class="mmc-indices-wrap"></div>
+        <button type="button" class="button mmc-add-indice" style="margin-top:10px;">+ Agregar índice</button>
+    </div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-color">
+<div class="mmc-color-row" data-cid="__CID__">
+    <button type="button" class="mmc-remove-color" title="Eliminar color">&times;</button>
+    <div class="mmc-field">
+        <label>Nombre del color</label>
+        <input type="text" name="__BASE__[colores][__CID__][nombre]" placeholder="Ej: Gris">
+    </div>
+    <div class="mmc-field">
+        <label>Tipo</label>
+        <select class="mmc-color-tipo-select" name="__BASE__[colores][__CID__][tipo]">
+            <option value="solido">Sólido</option>
+            <option value="degradado">Degradado</option>
+        </select>
+    </div>
+    <div class="mmc-field">
+        <label>Color 1</label>
+        <input type="color" name="__BASE__[colores][__CID__][hex1]" value="#cccccc">
+    </div>
+    <div class="mmc-field mmc-color-hex2" style="display:none;">
+        <label>Color 2 (degradado)</label>
+        <input type="color" name="__BASE__[colores][__CID__][hex2]" value="#666666">
+    </div>
+    <div class="mmc-field" style="flex:1.3;">
+        <label>Imagen (opcional)</label>
+        <div class="mmc-img-row">
+            <input type="text" name="__BASE__[colores][__CID__][imagen_url]" id="col_img___UID_____CID__" placeholder="URL">
+            <img class="mmc-img-preview" src="" id="col_img_prev___UID_____CID__">
+            <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#col_img___UID_____CID__" data-preview="#col_img_prev___UID_____CID__">Subir</button>
+        </div>
+    </div>
+</div>
+</script>
+            
 
             <!-- GUARDAR -->
             <div class="mmc-card">
@@ -542,20 +1289,174 @@ function mmc_modal_optica_admin_page() {
         </form>
     </div>
 
-    <script>
-    jQuery(document).ready(function($) {
-        $('.mmc-up-btn').on('click', function(e) {
-            e.preventDefault();
-            var ti = $($(this).data('target'));
-            var tp = $($(this).data('preview'));
-            var f  = wp.media({multiple:false});
-            f.on('select', function() {
-                var url = f.state().get('selection').first().toJSON().url;
-                ti.val(url); tp.attr('src',url).addClass('visible');
-            });
-            f.open();
+ <!-- ===== REEMPLAZAR POR:===== -->
+<script>
+jQuery(document).ready(function($) {
+
+    $(document).on('click', '.mmc-up-btn', function(e) {
+        e.preventDefault();
+        var ti = $($(this).data('target'));
+        var tp = $($(this).data('preview'));
+        var f  = wp.media({multiple:false});
+        f.on('select', function() {
+            var url = f.state().get('selection').first().toJSON().url;
+            ti.val(url); tp.attr('src',url).addClass('visible');
         });
+        f.open();
     });
-    </script>
-    <?php
+
+    function nextId($container, attr) {
+        var current = parseInt($container.attr(attr) || '0');
+        current++;
+        $container.attr(attr, current);
+        return current;
+    }
+    function replaceAll(str, find, val) { return str.split(find).join(val); }
+
+    // ---------- Agregar Protección ----------
+    $(document).on('click', '.mmc-add-proteccion', function() {
+        var flujo = $(this).data('flujo');
+        var $wrap = $('#mmc-protecciones-wrap-' + flujo);
+        var pid   = nextId($wrap, 'data-counter');
+        var num   = $wrap.children('.mmc-proteccion-card').length + 1;
+        var html  = $('#tpl-proteccion').html();
+        html = replaceAll(html, '__FLUJO__', flujo);
+        html = replaceAll(html, '__PID__', pid);
+        html = replaceAll(html, '__NUM__', num);
+        $wrap.append(html);
+    });
+
+    // ---------- Agregar Sub-Protección ----------
+    $(document).on('click', '.mmc-add-subproteccion', function() {
+        var $protCard = $(this).closest('.mmc-proteccion-card');
+        var flujo = $protCard.data('flujo');
+        var pid   = $protCard.data('pid');
+        var sid   = nextId($protCard, 'data-scounter');
+        var num   = $protCard.find('.mmc-subprotecciones-lista').children('.mmc-subproteccion-card').length + 1;
+        var html  = $('#tpl-subproteccion').html();
+        html = replaceAll(html, '__FLUJO__', flujo);
+        html = replaceAll(html, '__PID__', pid);
+        html = replaceAll(html, '__SID__', sid);
+        html = replaceAll(html, '__NUM__', num);
+        $protCard.find('.mmc-subprotecciones-lista').append(html);
+    });
+
+    // ---------- Agregar Índice (protección o sub-protección, delegado por el .mmc-card más cercano) ----------
+// BUSCAR el bloque completo de '.mmc-add-indice' (el handler existente) y REEMPLAZARLO por:
+
+    $(document).on('click', '.mmc-add-indice', function() {
+        var $card = $(this).closest('.mmc-subproteccion-card');
+        var base, uid, esSub = false;
+        if ($card.length) {
+            esSub = true;
+            var flujo = $card.data('flujo'), pid = $card.data('pid'), sid = $card.data('sid');
+            base = 'protecciones[' + flujo + '][' + pid + '][sub_protecciones][' + sid + ']';
+        } else {
+            $card = $(this).closest('.mmc-proteccion-card');
+            var flujo2 = $card.data('flujo'), pid2 = $card.data('pid');
+            base = 'protecciones[' + flujo2 + '][' + pid2 + ']';
+        }
+        var flujoC = $card.data('flujo'), pidC = $card.data('pid');
+        var iid  = nextId($card, 'data-icounter');
+        var html = $('#tpl-indice').html();
+        html = replaceAll(html, '__FLUJO__', flujoC);
+        html = replaceAll(html, '__PID__', pidC);
+        html = replaceAll(html, '__IID__', iid);
+
+        if (esSub) {
+            var oldBaseDefault = 'protecciones[' + flujoC + '][' + pidC + '][indices][' + iid + ']';
+            var newBase = base + '[indices][' + iid + ']';
+            html = html.split(oldBaseDefault).join(newBase);
+        }
+        $card.find('.mmc-indices-wrap').first().append(html);
+    });
+
+    // ---------- Tags dinámicos (protección, sub-protección, índice) ----------
+    $(document).on('click', '.mmc-add-tag', function() {
+        var $wrap = $(this).siblings('.mmc-tags-wrap');
+        var base  = $wrap.data('base');
+        var tid   = nextId($wrap, 'data-tcounter');
+        var html  = $('#tpl-tag').html();
+        html = replaceAll(html, '__BASE__', base);
+        html = replaceAll(html, '__TID__', tid);
+        $wrap.append(html);
+    });
+    $(document).on('click', '.mmc-remove-tag', function() { $(this).closest('.mmc-tag-row').remove(); });
+
+    // ---------- Recubrimientos globales ----------
+    $(document).on('click', '.mmc-add-recubrimiento', function() {
+        var $wrap = $('#mmc-recubrimientos-wrap');
+        var rid   = nextId($wrap, 'data-counter');
+        var num   = $wrap.children('.mmc-recubrimiento-card').length + 1;
+        var newId = 'rc_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+        var html  = $('#tpl-recubrimiento').html();
+        html = replaceAll(html, '__RID__', rid);
+        html = replaceAll(html, '__NUM__', num);
+        html = replaceAll(html, '__NEWID__', newId);
+        $wrap.append(html);
+    });
+    $(document).on('click', '.mmc-remove-recubrimiento', function() {
+        if (confirm('¿Eliminar este recubrimiento? Se quitará de los índices que lo tengan asignado al guardar.')) {
+            $(this).closest('.mmc-recubrimiento-card').remove();
+        }
+    });
+
+    // ---------- Agregar Color (protección o sub-protección) ----------
+    $(document).on('click', '.mmc-add-color', function() {
+        var $wrapBtn = $(this);
+        var $card = $wrapBtn.closest('.mmc-subproteccion-card');
+        var base, uid;
+        if ($card.length) {
+            var flujo = $card.data('flujo'), pid = $card.data('pid'), sid = $card.data('sid');
+            base = 'protecciones[' + flujo + '][' + pid + '][sub_protecciones][' + sid + ']';
+            uid  = flujo + '_' + pid + '_sub_' + sid;
+        } else {
+            $card = $wrapBtn.closest('.mmc-proteccion-card');
+            var flujo2 = $card.data('flujo'), pid2 = $card.data('pid');
+            base = 'protecciones[' + flujo2 + '][' + pid2 + ']';
+            uid  = flujo2 + '_' + pid2;
+        }
+        var cid  = nextId($card, 'data-ccounter');
+        var html = $('#tpl-color').html();
+        html = replaceAll(html, '__BASE__', base);
+        html = replaceAll(html, '__UID__', uid);
+        html = replaceAll(html, '__CID__', cid);
+        $wrapBtn.siblings('.mmc-colores-rows').append(html);
+    });
+
+    // ---------- Toggle: paso previo → mostrar Sub-Protecciones / ocultar Índices ----------
+    $(document).on('change', '.mmc-paso-previo-checkbox', function() {
+        var $card = $(this).closest('.mmc-proteccion-card');
+        if ($(this).is(':checked')) {
+            $card.find('.mmc-subprotecciones-wrap').first().show();
+            $card.find('.mmc-indices-wrap-outer').first().hide();
+        } else {
+            $card.find('.mmc-subprotecciones-wrap').first().hide();
+            $card.find('.mmc-indices-wrap-outer').first().show();
+        }
+    });
+
+    // ---------- Toggle: fotocromático → mostrar colores ----------
+    $(document).on('change', '.mmc-foto-checkbox', function() {
+        $(this).closest('.mmc-toggle-row').next('.mmc-colores-wrap').toggle($(this).is(':checked'));
+    });
+
+    // ---------- Toggle: tipo de color (degradado muestra Color 2) ----------
+    $(document).on('change', '.mmc-color-tipo-select', function() {
+        $(this).closest('.mmc-color-row').find('.mmc-color-hex2').toggle($(this).val() === 'degradado');
+    });
+
+    // ---------- Eliminar ----------
+    $(document).on('click', '.mmc-remove-proteccion', function() {
+        if (confirm('¿Eliminar esta protección, sus sub-protecciones e índices?')) $(this).closest('.mmc-proteccion-card').remove();
+    });
+    $(document).on('click', '.mmc-remove-subproteccion', function() {
+        if (confirm('¿Eliminar esta sub-protección y sus índices?')) $(this).closest('.mmc-subproteccion-card').remove();
+    });
+    $(document).on('click', '.mmc-remove-indice', function() { $(this).closest('.mmc-indice-row').remove(); });
+    $(document).on('click', '.mmc-remove-color', function() { $(this).closest('.mmc-color-row').remove(); });
+
+});
+</script>
+<?php
 }
