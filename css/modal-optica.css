@@ -416,11 +416,23 @@
 /* ==========================================================================
    TOOLTIP FLOTANTE
    ========================================================================== */
-#mmc-tooltip-box { position: fixed; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; max-width: 250px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); z-index: 10000000; display: none; }
-#mmc-tooltip-box.visible { display: block; }
-#mmc-tooltip-texto { font-size: 13px; color: #374151; line-height: 1.6; margin: 0 0 10px; }
+#mmc-tooltip-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    z-index: 100000000; display: none; align-items: center; justify-content: center;
+    padding: 20px; box-sizing: border-box;
+}
+#mmc-tooltip-overlay.visible { display: flex; }
+#mmc-tooltip-box {
+    position: relative; background: #fff; border-radius: 14px; padding: 26px 24px 24px;
+    max-width: 340px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+#mmc-tooltip-cerrar {
+    position: absolute; top: 12px; right: 14px; background: none; border: none;
+    font-size: 22px; color: #999; cursor: pointer; line-height: 1; padding: 0;
+}
+#mmc-tooltip-texto { font-size: 14px; color: #374151; line-height: 1.65; margin: 0 0 12px; padding-right: 14px; }
 #mmc-tooltip-texto:last-child { margin-bottom: 0; }
-#mmc-tooltip-img { width: 100%; border-radius: 6px; object-fit: cover; max-height: 140px; }
+#mmc-tooltip-img { width: 100%; border-radius: 8px; object-fit: cover; max-height: 220px; display: block; }
 
 /* ==========================================================================
    RESPONSIVE
@@ -437,3 +449,184 @@
     .mmc-titulo-paso { font-size: 18px; }
     .mmc-readers-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+
+
+
+
+/* ==========================================================================
+   PRESCRIPCIÓN ONLINE — FORMULARIO
+   ========================================================================== */
+.mmc-como-leer-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: none; color: #2563eb; font-size: 14px;
+    font-weight: 500; text-decoration: underline; cursor: pointer;
+    padding: 0; margin-bottom: 24px;
+}
+.mmc-help-circle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid #2563eb;
+    font-size: 10px; font-weight: 700; text-decoration: none;
+}
+
+.mmc-rx-table-wrap { max-width: 560px; margin-bottom: 20px; overflow-x: auto; }
+.mmc-rx-table { width: 100%; border-collapse: collapse; background: #fff; }
+.mmc-rx-table th, .mmc-rx-table td {
+    border: 1px solid #e5e7eb; padding: 10px 12px; text-align: left; font-size: 13px;
+}
+.mmc-rx-table thead th { background: #f8fafc; font-weight: 600; color: #374151; }
+.mmc-rx-table tbody th { background: #f8fafc; font-weight: 600; color: #111; white-space: nowrap; }
+
+.mmc-rx-select {
+    width: 100%; height: 38px; padding: 0 8px; border: 1px solid #d1d5db;
+    border-radius: 6px; font-size: 13px; color: #111; background: #fff; outline: none;
+    transition: border-color .15s;
+}
+.mmc-rx-select:focus { border-color: #2563eb; }
+.mmc-rx-select:disabled { background: #f3f4f6; color: #aaa; cursor: not-allowed; }
+
+.mmc-rx-pd-wrap { max-width: 480px; margin-bottom: 20px; }
+.mmc-rx-pd-single, .mmc-rx-pd-dual { margin-bottom: 12px; }
+.mmc-rx-pd-single label, .mmc-rx-pd-dual-item label {
+    display: block; font-size: 11px; font-weight: 600; color: #94a3b8;
+    text-transform: uppercase; margin-bottom: 5px;
+}
+.mmc-rx-pd-dual { display: flex; gap: 14px; }
+.mmc-rx-pd-dual-item { flex: 1; }
+.mmc-rx-checkbox-label {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; color: #374151; cursor: pointer;
+}
+
+.mmc-rx-comentarios { max-width: 560px; margin-bottom: 24px; }
+.mmc-rx-comentarios label {
+    display: block; font-size: 11px; font-weight: 600; color: #94a3b8;
+    text-transform: uppercase; margin-bottom: 6px;
+}
+.mmc-rx-comentarios textarea {
+    width: 100%; min-height: 90px; padding: 10px 12px; border: 1px solid #d1d5db;
+    border-radius: 8px; font-size: 13px; color: #111; resize: vertical; outline: none;
+}
+.mmc-rx-comentarios textarea:focus { border-color: #2563eb; }
+
+/* ==========================================================================
+   MODAL: CÓMO LEER MI RECETA
+   ========================================================================== */
+#mmc-como-leer-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    z-index: 100000000; display: none; align-items: center; justify-content: center;
+}
+#mmc-como-leer-overlay.activo { display: flex; }
+#mmc-como-leer-modal {
+    background: #fff; border-radius: 14px; width: 90%; max-width: 700px;
+    max-height: 85vh; overflow: hidden; display: flex; position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+#mmc-como-leer-cerrar {
+    position: absolute; top: 14px; right: 16px; background: none; border: none;
+    font-size: 22px; color: #999; cursor: pointer; line-height: 1; z-index: 2;
+}
+#mmc-como-leer-tabs {
+    width: 220px; flex-shrink: 0; background: #f8fafc; padding: 24px 18px;
+    border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 4px;
+}
+#mmc-como-leer-tabs h3 { font-size: 16px; font-weight: 700; color: #111; margin: 0 0 16px; line-height: 1.3; }
+.mmc-cl-tab {
+    text-align: left; background: none; border: none; padding: 10px 10px; border-radius: 6px;
+    font-size: 13px; color: #64748b; cursor: pointer; transition: all .15s;
+}
+.mmc-cl-tab:hover { background: #eef2f7; color: #111; }
+.mmc-cl-tab.active { background: #e6f0ff; color: #2563eb; font-weight: 600; }
+
+#mmc-como-leer-contenido { flex: 1; padding: 28px 32px; overflow-y: auto; }
+#mmc-cl-titulo { font-size: 17px; font-weight: 700; color: #111; margin: 0 0 10px; }
+#mmc-cl-texto { font-size: 13.5px; color: #4b5563; line-height: 1.6; margin: 0 0 22px; }
+
+.mmc-cl-ejemplo, .mmc-cl-ejemplo-pd { width: 100%; border-collapse: collapse; }
+.mmc-cl-ejemplo th, .mmc-cl-ejemplo td,
+.mmc-cl-ejemplo-pd th, .mmc-cl-ejemplo-pd td {
+    border: 1px solid #e5e7eb; padding: 10px 12px; font-size: 13px; text-align: left;
+}
+.mmc-cl-ejemplo thead th { background: #f8fafc; color: #374151; font-weight: 600; }
+.mmc-cl-ejemplo tbody th { background: #f8fafc; color: #111; font-weight: 600; white-space: nowrap; }
+.mmc-cl-highlight { background: #dbeafe !important; color: #1e40af; font-weight: 600; }
+
+@media (max-width: 600px) {
+    #mmc-como-leer-modal { flex-direction: column; max-height: 90vh; }
+    #mmc-como-leer-tabs { width: 100%; flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid #e5e7eb; }
+    .mmc-rx-pd-dual { flex-direction: column; }
+}
+
+
+
+
+
+
+/* ==========================================================================
+   SELECTOR DE COLOR INLINE (fotocromáticos / tintados)
+   ========================================================================== */
+.mmc-color-selector-inline {
+    border: 1.5px solid #2563eb;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    background: #f8faff;
+    padding: 16px 20px 18px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
+.mmc-color-selector-titulo {
+    font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 12px;
+}
+.mmc-color-selector-titulo span { color: #111; font-weight: 700; }
+.mmc-color-swatches { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.mmc-color-swatch {
+    width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+    border: 2px solid #e5e7eb; transition: all .15s; display: block;
+    background-size: cover; background-position: center;
+}
+.mmc-color-swatch:hover { transform: scale(1.08); }
+.mmc-color-swatch.activo { border-color: #111; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111; }
+.mmc-btn-confirmar-color {
+    padding: 10px 22px; background: #2563eb; color: #fff; border: none;
+    border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s;
+}
+.mmc-btn-confirmar-color:hover { background: #1d4ed8; }
+.mmc-btn-confirmar-color:disabled { background: #c5c5c5; cursor: not-allowed; }
+.mmc-nivel-item { margin-bottom: 10px; }
+
+
+
+
+/* ==========================================================================
+   TAGS EN PROTECCIÓN/SUB-PROTECCIÓN (diseño tipo-card) — ilimitados
+   ========================================================================== */
+.mmc-tipo-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+
+/* Tags en Índice ya existían (.mmc-paquete-tags) — solo confirmamos wrap */
+.mmc-paquete-tags { display:flex; flex-wrap:wrap; gap:6px; }
+
+/* ==========================================================================
+   SELECTOR DE RECUBRIMIENTO (inline, dentro de la card de Índice)
+   ========================================================================== */
+.mmc-recub-selector-inline {
+    border: 1.5px solid #2563eb; border-top: none; border-radius: 0 0 10px 10px;
+    background: #f8faff; padding: 16px 20px 18px; margin-top: -10px; margin-bottom: 10px;
+}
+.mmc-recub-selector-titulo { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 12px; }
+.mmc-recub-opciones { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.mmc-recub-opcion {
+    position: relative; display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border: 1.5px solid #e5e7eb; border-radius: 8px;
+    background: #fff; cursor: pointer; transition: all .15s;
+}
+.mmc-recub-opcion:hover { border-color: #94a3b8; }
+.mmc-recub-opcion.activo { border-color: #2563eb; background: #eff6ff; }
+.mmc-recub-opcion.mmc-recub-recomendado { border-color: #f59e0b; }
+.mmc-recub-badge {
+    position: absolute; top: -9px; left: 12px; background: #f59e0b; color: #fff;
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase;
+}
+.mmc-recub-img { width: 40px; height: 32px; object-fit: contain; flex-shrink: 0; }
+.mmc-recub-textos { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.mmc-recub-textos strong { font-size: 14px; color: #111; }
+.mmc-recub-precio { font-size: 12px; color: #64748b; font-weight: 600; }
+.mmc-btn-confirmar-recub:disabled { background: #c5c5c5; cursor: not-allowed; }
