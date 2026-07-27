@@ -79,8 +79,19 @@ function mmc_sanitize_colores($raw_colores) {
 
 
 
+// REEMPLAZAR POR:
 function mmc_flujo_save() {
     if (!isset($_POST['mmc_flujo_save']) || !current_user_can('manage_options')) return false;
+
+    // Ajustes generales del sidebar
+    // REEMPLAZAR POR:
+    update_option('mmc_ajustes_sidebar', [
+        'envio_gratis_monto' => floatval($_POST['ajustes_sidebar']['envio_gratis_monto'] ?? 0),
+        'whatsapp_url'       => esc_url_raw($_POST['ajustes_sidebar']['whatsapp_url'] ?? ''),
+        'mascara_luna_url'   => esc_url_raw($_POST['ajustes_sidebar']['mascara_luna_url'] ?? ''),
+    ]);
+
+    // Paso 1
 
     // Paso 1
     $p1 = $_POST['flujo_paso1'] ?? [];
@@ -114,9 +125,10 @@ function mmc_flujo_save() {
     update_option('mmc_flujo_progresivo', $sp);
 
     // Prescripción habilitados
+// REEMPLAZAR POR:
+    // Prescripción: correo de recepción de recetas (reemplaza "Enviar después")
     update_option('mmc_flujo_prescripcion', [
-        'guardada_habilitado' => isset($_POST['prescripcion_guardada']) ? 1 : 0,
-        'despues_habilitado'  => isset($_POST['prescripcion_despues'])  ? 1 : 0,
+        'correo_receta' => sanitize_email($_POST['prescripcion_correo'] ?? ''),
     ]);
 
 // REEMPLAZAR POR:
@@ -628,7 +640,8 @@ function mmc_modal_optica_admin_page() {
     ];
     $opciones  = get_option('mmc_flujo_paso1', $defaults_p1);
     $prog      = get_option('mmc_flujo_progresivo', ['standard'=>['titulo'=>'Estándar','desc'=>'','precio'=>0,'advertencia'=>'','icono_url'=>''],'office'=>['titulo'=>'Oficina','desc'=>'','precio'=>0,'advertencia'=>'No apto para conducir','icono_url'=>'']]);
-    $presc_cfg = get_option('mmc_flujo_prescripcion', ['guardada_habilitado'=>0,'despues_habilitado'=>0]);
+    // REEMPLAZAR POR:
+    $presc_cfg = get_option('mmc_flujo_prescripcion', ['correo_receta' => '']);
     ?>
     <style>
         #mmc-flujo-wrap * { box-sizing:border-box; }
@@ -698,6 +711,78 @@ function mmc_modal_optica_admin_page() {
 #mmc-flujo-wrap .mmc-recub-check-row:last-child { border-bottom:none; }
 #mmc-flujo-wrap .mmc-recub-enable-label { flex:1; display:flex; align-items:center; gap:6px; font-weight:600; }
 #mmc-flujo-wrap .mmc-recub-recomendado-label { display:flex; align-items:center; gap:6px; color:#c2410c; font-weight:600; }
+
+
+
+
+#mmc-tree-editor-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+#mmc-tree-panel {
+    width: 280px;
+    flex-shrink: 0;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+    position: sticky;
+    top: 32px;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+}
+.mmc-tree-panel-titulo { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin: 0 0 10px; letter-spacing: .04em; }
+#mmc-tree-root { list-style: none; margin: 0; padding: 0; }
+.mmc-tree-divider { height: 1px; background: #e2e8f0; margin: 10px 2px; list-style: none; }
+.mmc-tree-item { margin: 1px 0; }
+.mmc-tree-row {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 8px; border-radius: 6px; cursor: pointer;
+    font-size: 13px; color: #374151; user-select: none;
+}
+.mmc-tree-row:hover { background: #f1f5f9; }
+.mmc-tree-row.activo { background: #dbeafe; color: #1e40af; font-weight: 600; }
+.mmc-tree-toggle {
+    width: 14px; text-align: center; color: #94a3b8; font-size: 11px;
+    transition: transform .15s; flex-shrink: 0;
+}
+.mmc-tree-toggle.mmc-tree-toggle-open { transform: rotate(90deg); }
+.mmc-tree-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Jerarquía visual: sangría + línea guía por cada nivel */
+.mmc-tree-children {
+    display: none;
+    list-style: none;
+    margin: 0 0 0 8px;
+    padding: 0 0 0 14px;
+    border-left: 1px dashed #dbe2ea;
+}
+
+#mmc-editor-panel {
+    flex: 1;
+    min-width: 0;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 24px;
+}
+#mmc-editor-placeholder { color: #94a3b8; font-size: 14px; padding: 40px 0; text-align: center; }
+
+/* Por defecto todo nodo editable está oculto; solo se muestra si está en la cadena activa */
+.mmc-editor-node { display: none; }
+.mmc-editor-node.mmc-editor-active { display: block; }
+
+/* Cuando un nodo hijo está activo dentro de un padre también activo, separarlos visualmente */
+.mmc-editor-node.mmc-editor-active .mmc-editor-node.mmc-editor-active {
+    margin-top: 14px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
     </style>
 
     <div id="mmc-flujo-wrap">
@@ -711,15 +796,66 @@ function mmc_modal_optica_admin_page() {
             </div>
         </div>
 
+        <!-- REEMPLAZAR POR: -->
         <?php if($saved): ?>
         <div class="mmc-saved">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             Configuración guardada correctamente.
         </div>
         <?php endif; ?>
+        
+        
 
+        
+       
         <form method="post">
 
+            <div id="mmc-tree-editor-layout">
+                <div id="mmc-tree-panel">
+                    <p class="mmc-tree-panel-titulo">Estructura</p>
+                    <ul id="mmc-tree-root"></ul>
+                </div>
+                <div id="mmc-editor-panel">
+                <div id="mmc-editor-placeholder">← Selecciona un elemento del árbol para editarlo.</div>
+
+            <!-- ===== AJUSTES GENERALES DEL SIDEBAR ===== -->
+
+            <!-- ===== AJUSTES GENERALES DEL SIDEBAR ===== -->
+
+            <div class="mmc-top-section" data-tree-label="Ajustes Generales" id="mmc-section-ajustes">
+                <p class="mmc-section-titulo">Ajustes Generales — Columna Izquierda</p>
+                <?php $ajustes_sidebar = get_option('mmc_ajustes_sidebar', ['envio_gratis_monto' => 0, 'whatsapp_url' => '']); ?>
+                <div class="mmc-card">
+                    <div class="mmc-card-body">
+                        <div class="mmc-grid-2">
+                            <div class="mmc-field">
+                            <label>Monto mínimo para envío gratis</label>
+                            <input type="number" step="0.01" min="0" name="ajustes_sidebar[envio_gratis_monto]" value="<?php echo esc_attr($ajustes_sidebar['envio_gratis_monto'] ?? 0); ?>" placeholder="Ej: 276">
+                            <p class="mmc-hint">Se muestra como "Envío gratis en pedidos superiores a [monto]". Déjalo en 0 para ocultar el mensaje.</p>
+                            </div>
+                        
+                            <div class="mmc-field">
+                            <label>Link de WhatsApp ("¿Necesitas ayuda?")</label>
+                            <input type="text" name="ajustes_sidebar[whatsapp_url]" value="<?php echo esc_attr($ajustes_sidebar['whatsapp_url'] ?? ''); ?>" placeholder="https://wa.me/51999999999">
+                            <p class="mmc-hint">A dónde lleva el ícono de chat en vivo.</p>
+                            </div>
+                        </div>
+                    <hr class="mmc-divider">
+                        <div class="mmc-field" style="max-width:500px;">
+                        <label>Máscara de luna (fotocromáticos) — imagen genérica para todos los productos</label>
+                        <div class="mmc-img-row">
+                            <input type="text" name="ajustes_sidebar[mascara_luna_url]" id="mascara_luna_url" value="<?php echo esc_attr($ajustes_sidebar['mascara_luna_url'] ?? ''); ?>" placeholder="URL de la máscara (PNG con transparencia)">
+                            <img class="mmc-img-preview <?php echo !empty($ajustes_sidebar['mascara_luna_url'])?'visible':'';?>" src="<?php echo esc_url($ajustes_sidebar['mascara_luna_url'] ?? ''); ?>" id="mascara_luna_prev">
+                            <button type="button" class="mmc-btn-upload mmc-up-btn" data-target="#mascara_luna_url" data-preview="#mascara_luna_prev">Subir</button>
+                        </div>
+                        <p class="mmc-hint">Se usa como forma de la luna mientras el cliente elige el color fotocromático, sin importar la montura.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PASO 1: OPCIONES DE USO ===== -->
+            
+            <div class="mmc-top-section" data-tree-label="Paso 1 — Opciones de uso" id="mmc-section-paso1">
             <!-- ===== PASO 1: OPCIONES DE USO ===== -->
             <p class="mmc-section-titulo">Paso 1 — Opciones de uso</p>
 
@@ -784,9 +920,13 @@ function mmc_modal_optica_admin_page() {
                     </div>
                 </div>
             </div>
+           
             <?php endforeach; ?>
+            </div>
 
             <!-- ===== PROGRESIVO: Standard / Office ===== -->
+            
+            <div class="mmc-top-section" data-tree-label="Progresivo — Tipos de lente" id="mmc-section-progresivo">
             <p class="mmc-section-titulo">Progresivo — Tipos de lente</p>
 
             <?php
@@ -830,33 +970,32 @@ function mmc_modal_optica_admin_page() {
                     </div>
                 </div>
             </div>
+           
             <?php endforeach; ?>
-
-            <!-- ===== PRESCRIPCIÓN: Habilitar/deshabilitar ===== -->
-            <p class="mmc-section-titulo">Opciones de prescripción — Habilitar</p>
-            <div class="mmc-card">
-                <div class="mmc-card-body">
-                    <p style="font-size:13px;color:#64748b;margin:0 0 14px;">"Completar en línea" y "Subir imagen" están siempre habilitadas. Activa las siguientes si las tienes disponibles:</p>
-                    <div class="mmc-toggle-row">
-                        <input type="checkbox" id="prescripcion_guardada" name="prescripcion_guardada" <?php checked($presc_cfg['guardada_habilitado'], 1); ?>>
-                        <label for="prescripcion_guardada">
-                            <strong>Usar receta guardada</strong>
-                            <span class="mmc-toggle-desc"> — El cliente puede usar una prescripción previamente guardada</span>
-                        </label>
-                    </div>
-                    <div class="mmc-toggle-row">
-                        <input type="checkbox" id="prescripcion_despues" name="prescripcion_despues" <?php checked($presc_cfg['despues_habilitado'], 1); ?>>
-                        <label for="prescripcion_despues">
-                            <strong>Enviar después</strong>
-                            <span class="mmc-toggle-desc"> — El cliente puede enviar su receta después del pago</span>
-                        </label>
-                    </div>
-                </div>
             </div>
 
- 
- <!-- REEMPLAZAR POR: -->
-            <!-- ===== PROTECCIONES E ÍNDICES POR FLUJO ===== -->
+            
+            <!-- ===== REempazada ===== -->
+            <div class="mmc-top-section" data-tree-label="Prescripción — Ajustes" id="mmc-section-prescripcion">
+            <!-- ===== PRESCRIPCIÓN: Ajustes ===== -->
+            <p class="mmc-section-titulo">Opciones de prescripción — Ajustes</p>
+            <div class="mmc-card">
+                <div class="mmc-card-body">
+                    <p style="font-size:13px;color:#64748b;margin:0 0 14px;">"Completar en línea", "Subir imagen" y "Enviar por correo" están siempre activas.</p>
+                    <div class="mmc-field" style="max-width:400px;">
+                        <label>Correo para recepción de recetas</label>
+                        <input type="email" name="prescripcion_correo" value="<?php echo esc_attr($presc_cfg['correo_receta'] ?? ''); ?>" placeholder="hola@tudominio.com">
+                        <p class="mmc-hint">Se muestra al cliente en la opción "Enviar por correo".</p>
+                    </div>
+                    <!-- Próximamente: "Usar receta guardada" (requiere sistema de cuentas de usuario, aún no implementado) -->
+                </div>
+            </div>
+            </div>
+            </div>
+
+            <!-- ===== RECUBRIMIENTOS (GLOBAL) ===== -->
+            
+            <div class="mmc-top-section" data-tree-label="Recubrimientos (Global)" id="mmc-section-recubrimientos">
             <!-- ===== RECUBRIMIENTOS (GLOBAL) ===== -->
             <p class="mmc-section-titulo">Recubrimientos (Global)</p>
             <p style="font-size:13px;color:#64748b;margin:-8px 0 16px;">Crea aquí todos los recubrimientos disponibles. Luego, dentro de cada Índice, eliges cuáles aplican y cuál es el recomendado. Recuerda crear uno tipo "Sin recubrimiento" con precio 0 (se mostrará como "Gratis").</p>
@@ -868,7 +1007,11 @@ function mmc_modal_optica_admin_page() {
                     <?php echo mmc_admin_render_recubrimiento_row($rid, $r); ?>
                 <?php endforeach; ?>
             </div>
+           
             <button type="button" class="button button-primary mmc-add-recubrimiento" style="margin-bottom:30px;">+ Agregar recubrimiento</button>
+            </div>
+
+            <!-- ===== PROTECCIONES E ÍNDICES POR FLUJO ===== -->
 
             <!-- ===== PROTECCIONES E ÍNDICES POR FLUJO ===== -->
             <?php
@@ -886,10 +1029,12 @@ function mmc_modal_optica_admin_page() {
                 'mmc-tag-gris'    => 'Gris',
                 'mmc-tag-morado'  => 'Morado',
             ];
+            // REEMPLAZAR POR:
             foreach ($flujos_config as $flujo_key => $flujo_nombre):
                 $protecciones_flujo = get_option('mmc_protecciones_' . $flujo_key, []);
                 $max_pid = !empty($protecciones_flujo) ? max(array_keys($protecciones_flujo)) : -1;
             ?>
+            <div class="mmc-top-section mmc-flujo-section" data-tree-label="<?php echo esc_attr($flujo_nombre); ?>" data-flujo="<?php echo esc_attr($flujo_key); ?>" id="mmc-section-flujo-<?php echo esc_attr($flujo_key); ?>">
             <p class="mmc-section-titulo">Protecciones e Índices — <?php echo $flujo_nombre; ?></p>
             <div class="mmc-protecciones-wrap" id="mmc-protecciones-wrap-<?php echo $flujo_key;?>" data-counter="<?php echo $max_pid; ?>">
                 <?php
@@ -900,8 +1045,15 @@ function mmc_modal_optica_admin_page() {
                 }
             ?>
             </div>
+            
             <button type="button" class="button button-primary mmc-add-proteccion" data-flujo="<?php echo $flujo_key;?>" style="margin-bottom:30px;">+ Agregar protección</button>
+            </div>
             <?php endforeach; ?>
+
+            </div><!-- /#mmc-editor-panel -->
+            </div><!-- /#mmc-tree-editor-layout -->
+
+            <!-- ===== PLANTILLAS OCULTAS PARA AGREGAR DINÁMICAMENTE ===== -->
 
             <!-- ===== PLANTILLAS OCULTAS PARA AGREGAR DINÁMICAMENTE ===== -->
             
@@ -1455,6 +1607,169 @@ jQuery(document).ready(function($) {
     });
     $(document).on('click', '.mmc-remove-indice', function() { $(this).closest('.mmc-indice-row').remove(); });
     $(document).on('click', '.mmc-remove-color', function() { $(this).closest('.mmc-color-row').remove(); });
+    
+    
+// =========================================================================
+    // ÁRBOL + EDITOR (no mueve el DOM — muestra la cadena de ancestros activa)
+    // =========================================================================
+    function mmcTreeEditorInit() {
+        var $root = $('#mmc-tree-root');
+        $root.empty();
+
+        $('.mmc-top-section, .mmc-proteccion-card, .mmc-subproteccion-card, .mmc-indice-row, .mmc-recubrimiento-card').addClass('mmc-editor-node');
+
+        function addTreeNode($ul, label, $target) {
+            var $li  = $('<li class="mmc-tree-item"></li>');
+            var $row = $('<div class="mmc-tree-row"><span class="mmc-tree-toggle">▸</span><span class="mmc-tree-label"></span></div>');
+            $row.data('target', $target);
+            $row.find('.mmc-tree-label').text(label && label.length ? label : '(sin nombre)');
+            $li.append($row);
+            var $childUl = $('<ul class="mmc-tree-children"></ul>');
+            $li.append($childUl);
+            $ul.append($li);
+
+            var $nombreInput = $target.find('input[name$="[nombre]"]').first();
+            if ($nombreInput.length) {
+                $nombreInput.on('input', function() {
+                    $row.find('.mmc-tree-label').text($(this).val() || '(sin nombre)');
+                });
+            }
+            return { $row: $row, $childUl: $childUl, $li: $li };
+        }
+
+        function procesarProtecciones($wrap, $parentUl) {
+            $wrap.children('.mmc-proteccion-card').each(function() {
+                var $card  = $(this);
+                var nombre = $card.find('input[name$="[nombre]"]').first().val();
+                var node   = addTreeNode($parentUl, nombre, $card);
+
+                var $subLista = $card.find('.mmc-subprotecciones-lista').first();
+                $subLista.children('.mmc-subproteccion-card').each(function() {
+                    var $sub      = $(this);
+                    var subNombre = $sub.find('input[name$="[nombre]"]').first().val();
+                    var subNode   = addTreeNode(node.$childUl, subNombre, $sub);
+
+                    $sub.find('.mmc-indices-wrap').first().children('.mmc-indice-row').each(function() {
+                        var $idx      = $(this);
+                        var idxNombre = $idx.find('input[name$="[nombre]"]').first().val();
+                        addTreeNode(subNode.$childUl, idxNombre, $idx);
+                    });
+                });
+
+                $card.find('.mmc-indices-wrap-outer').first().find('.mmc-indices-wrap').first().children('.mmc-indice-row').each(function() {
+                    var $idx      = $(this);
+                    var idxNombre = $idx.find('input[name$="[nombre]"]').first().val();
+                    addTreeNode(node.$childUl, idxNombre, $idx);
+                });
+            });
+        }
+
+        var flujoDividerAgregado = false;
+
+        $('.mmc-top-section').each(function() {
+            var $section = $(this);
+            var label    = $section.data('tree-label');
+
+            if ($section.hasClass('mmc-flujo-section') && !flujoDividerAgregado) {
+                $root.append('<li class="mmc-tree-divider"></li>');
+                flujoDividerAgregado = true;
+            }
+
+            var node = addTreeNode($root, label, $section);
+
+            if ($section.hasClass('mmc-flujo-section')) {
+                var flujo = $section.data('flujo');
+                var $wrap = $section.find('#mmc-protecciones-wrap-' + flujo);
+                procesarProtecciones($wrap, node.$childUl);
+            }
+
+            if ($section.attr('id') === 'mmc-section-recubrimientos') {
+                $section.find('.mmc-recubrimiento-card').each(function() {
+                    var $rc    = $(this);
+                    var nombre = $rc.find('input[name$="[nombre]"]').first().val();
+                    addTreeNode(node.$childUl, nombre, $rc);
+                });
+            }
+        });
+    }
+
+    // Activa un nodo Y toda su cadena de ancestros (para que sus "+" sigan visibles)
+   // REEMPLAZAR POR:
+    var $rutaTocados = $(); // elementos que forzamos a mostrar/ocultar manualmente, para poder revertirlos
+
+    function mmcResetRuta() {
+        // Devuelve cada elemento tocado a su estado natural (sin estilos inline nuestros)
+        $rutaTocados.removeAttr('style');
+        $rutaTocados = $();
+        // Vuelve a sincronizar las secciones que dependen de checkboxes (paso previo / fotocromático)
+        // para que no queden mal mostradas tras quitar nuestros estilos forzados.
+        $('.mmc-paso-previo-checkbox').trigger('change');
+        $('.mmc-foto-checkbox').trigger('change');
+    }
+
+    // Activa ÚNICAMENTE el nodo clickeado. Los contenedores intermedios (que no son
+    // en sí un "nodo editable") se hacen transparentes solo para dejar pasar la vista
+    // hasta el nodo activo — no se muestra ningún campo de los padres.
+    function mmcActivarNodo($target, $row) {
+        mmcResetRuta();
+
+        $('.mmc-editor-node').removeClass('mmc-editor-active');
+        $('.mmc-tree-row').removeClass('activo');
+        $('#mmc-editor-placeholder').hide();
+
+        var $current = $target;
+        var $parent  = $current.parent();
+        while ($parent.length && $parent.attr('id') !== 'mmc-editor-panel') {
+            var $hermanos = $parent.children().not($current);
+            $hermanos.hide();
+            $rutaTocados = $rutaTocados.add($hermanos);
+
+            $parent.show();
+            $rutaTocados = $rutaTocados.add($parent);
+
+            $current = $parent;
+            $parent  = $current.parent();
+        }
+
+        $target.addClass('mmc-editor-active').show();
+        $rutaTocados = $rutaTocados.add($target);
+
+        $row.addClass('activo');
+
+        // Expande visualmente el árbol hasta este nodo
+        $row.parents('.mmc-tree-children').show();
+        $row.parents('.mmc-tree-children').each(function() {
+            $(this).prev('.mmc-tree-row').find('.mmc-tree-toggle').addClass('mmc-tree-toggle-open');
+        });
+    }
+
+    // REEMPLAZAR POR:
+    $(document).on('click', '.mmc-tree-row', function(e) {
+        if ($(e.target).hasClass('mmc-tree-toggle')) return;
+
+        var $row    = $(this);
+        var $target = $row.data('target');
+        if ($target && $target.length) mmcActivarNodo($target, $row);
+
+        // Además de activar el editor, expande los hijos propios de este nodo (si tiene)
+        var $childUl = $row.closest('li').children('.mmc-tree-children');
+        if ($childUl.length && $childUl.children().length) {
+            $childUl.show();
+            $row.find('.mmc-tree-toggle').addClass('mmc-tree-toggle-open');
+        }
+    });
+
+    $(document).on('click', '.mmc-tree-toggle', function(e) {
+        e.stopPropagation();
+        $(this).closest('li').find('> .mmc-tree-children').slideToggle(150);
+        $(this).toggleClass('mmc-tree-toggle-open');
+    });
+
+    mmcTreeEditorInit();
+
+    $(document).on('click', '.mmc-add-proteccion, .mmc-add-subproteccion, .mmc-add-indice, .mmc-add-recubrimiento, .mmc-remove-proteccion, .mmc-remove-subproteccion, .mmc-remove-indice, .mmc-remove-recubrimiento', function() {
+        setTimeout(mmcTreeEditorInit, 60);
+    });
 
 });
 </script>
