@@ -7,11 +7,15 @@ jQuery(document).ready(function($) {
     var $swatches = $('.mmc-swatch-punto');
     
     if ($swatches.length > 0) {
+        // REEMPLAZAR POR:
         $(document).on('click', '.mmc-swatch-punto', function() {
             var $punto = $(this);
             var valor = $punto.data('valor');
             var nombreColor = $punto.data('nombre');
-            
+
+            // Fuente confiable: se guarda directo desde el clic, sin depender de leer texto del DOM después
+            window.mmcColorSeleccionadoNombre = nombreColor;
+
             // Actualiza el texto
             $('.mmc-color-name').text(nombreColor);
             
