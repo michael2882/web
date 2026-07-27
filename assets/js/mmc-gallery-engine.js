@@ -34,8 +34,10 @@ jQuery(document).ready(function($) {
     });
 
     // Si se limpia la selección (vuelve a la imagen original)
+    // REEMPLAZAR POR:
+    // Si se limpia la selección (vuelve a la imagen original)
     $productForm.on('reset_data', function() {
-        // Aquí podrías restaurar la galería original si lo deseas
+        window.mmcUltimaImagenVariacion = null;
     });
 });
 
@@ -70,7 +72,13 @@ jQuery(document).ready(function($) {
     initSwiper(); // Arrancamos el carrusel con la primera foto por defecto
 
     // Cuando el usuario cambia de color (Variación)
+    // REEMPLAZAR POR:
+    // Cuando el usuario cambia de color (Variación)
     $productForm.on('show_variation', function(event, variation) {
+        // Guardamos SIEMPRE la imagen real de esta variación (la que WooCommerce trae por defecto),
+        // sin importar si además tiene o no galería personalizada configurada.
+        window.mmcUltimaImagenVariacion = (variation.image && variation.image.src) ? variation.image.src : null;
+
         if (variation.mmc_gallery && variation.mmc_gallery.length > 0) {
             $thumbWrapper.empty();
             $swipeTrack.empty(); // Vaciamos la pista del carrusel
