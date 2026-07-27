@@ -426,13 +426,22 @@ function mmc_cargar_assets_single_product() {
 
 
 // ====== Ecosistema Modal Óptica ======
+// REEMPLAZAR POR:
 add_action( 'wp_enqueue_scripts', 'mmc_cargar_archivos_modal' );
 function mmc_cargar_archivos_modal() {
-    if ( is_product() ) { // Solo carga en la página del lente
+    if ( is_product() ) {
         wp_enqueue_style( 'mmc-modal-css', get_stylesheet_directory_uri() . '/css/modal-optica.css', [], time() );
         wp_enqueue_script( 'mmc-modal-js', get_stylesheet_directory_uri() . '/js/modal-optica.js', ['jquery'], time() , true );
+        wp_localize_script( 'mmc-modal-js', 'mmcAjax', [
+            'url'   => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mmc_receta_nonce'),
+        ]);
     }
 }
+
+
+
+
 // Cargar el HTML del Modal
 $modal_php = get_stylesheet_directory() . '/inc/modal-optica.php';
 if ( file_exists($modal_php) ) {
@@ -560,4 +569,188 @@ function mmc_cargar_recursos_swiper() {
         // 3. Tu archivo que "enciende" el carrusel (el que vamos a modificar ahora)
         wp_enqueue_script( 'mmc-carrusel-init', get_stylesheet_directory_uri() . '/js/carrusel-drag.js', array('swiper-js'), time(), true );
     }
+}
+
+
+
+
+/* ==========================================================================
+   SUBIDA DE IMAGEN DE RECETA (Modal Óptica)
+   ========================================================================== */
+add_action('wp_ajax_mmc_subir_receta', 'mmc_subir_receta_callback');
+add_action('wp_ajax_nopriv_mmc_subir_receta', 'mmc_subir_receta_callback');
+function mmc_subir_receta_callback() {
+    check_ajax_referer('mmc_receta_nonce', 'nonce');
+
+    if (empty($_FILES['archivo'])) {
+        wp_send_json_error(['message' => 'No se recibió ningún archivo.']);
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/media.php';
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+
+    $permitidos = ['jpg', 'jpeg', 'png', 'gif', 'pdf'];
+    $ext = strtolower(pathinfo($_FILES['archivo']['name'], PATHINFO_EXTENSION));
+
+    if (!in_array($ext, $permitidos, true)) {
+        wp_send_json_error(['message' => 'Formato no permitido. Usa PDF, JPG, GIF o PNG.']);
+    }
+    if ($_FILES['archivo']['size'] > 5 * 1024 * 1024) {
+        wp_send_json_error(['message' => 'El archivo supera los 5MB.']);
+    }
+
+    $attachment_id = media_handle_upload('archivo', 0);
+
+    if (is_wp_error($attachment_id)) {
+        wp_send_json_error(['message' => $attachment_id->get_error_message()]);
+    }
+
+    wp_send_json_success([
+        'attachment_id' => $attachment_id,
+        'url'           => wp_get_attachment_url($attachment_id),
+        'filename'      => basename(get_attached_file($attachment_id)),
+    ]);
+}
+
+
+
+
+
+/* ==========================================================================
+   FLUJO DE LENTES → METADATOS DEL CARRITO Y DEL PEDIDO
+   ========================================================================== */
+
+// 1. Capturar y sanitizar el flujo al añadir al carrito
+add_action('woocommerce_add_cart_item_data', 'mmc_add_cart_item_data', 10, 2);
+function mmc_add_cart_item_data($cart_item_data, $product_id) {
+    if (!empty($_POST['mmc_flujo_lentes'])) {
+        $raw     = wp_unslash($_POST['mmc_flujo_lentes']);
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded) && !empty($decoded)) {
+            $cart_item_data['mmc_flujo_lentes'] = mmc_sanitizar_flujo_lentes($decoded);
+            // Clave única para que WooCommerce NO fusione dos configuraciones distintas del mismo producto
+            $cart_item_data['unique_key'] = md5(microtime() . wp_rand());
+        }
+    }
+    return $cart_item_data;
+}
+
+function mmc_sanitizar_flujo_lentes($data) {
+    $campos_permitidos = [
+        'label','precio','od_sph','os_sph','od_cyl','os_cyl','od_axi','os_axi',
+        'pd_single','pd_izq','pd_der','dos_pd','comentarios','nombre','anio_nacimiento',
+        'attachment_id','url','filename','metodo','correo_destino','descripcion',
+    ];
+    $limpio = [];
+    foreach ($data as $key => $val) {
+        if (!is_array($val)) continue;
+        $item = [];
+        foreach ($campos_permitidos as $campo) {
+            if (!isset($val[$campo])) continue;
+            if ($campo === 'precio')            { $item[$campo] = floatval($val[$campo]); }
+            elseif ($campo === 'dos_pd')        { $item[$campo] = !empty($val[$campo]); }
+            elseif ($campo === 'attachment_id') { $item[$campo] = absint($val[$campo]); }
+            elseif ($campo === 'url')           { $item[$campo] = esc_url_raw($val[$campo]); }
+            elseif ($campo === 'comentarios' || $campo === 'descripcion') { $item[$campo] = sanitize_textarea_field($val[$campo]); }
+            else { $item[$campo] = sanitize_text_field($val[$campo]); }
+        }
+        $limpio[sanitize_key($key)] = $item;
+    }
+    return $limpio;
+}
+
+// 2. Etiquetas legibles (mismo criterio que el labelMap del JS)
+function mmc_flujo_labels() {
+    return [
+        'uso'                   => 'Tipo de uso',
+        'tipo-lente'             => 'Tipo de lente',
+        'readers'                => 'Medida (Readers)',
+        'prescripcion'           => 'Método de prescripción',
+        'prescripcion_valores'   => 'Receta ingresada',
+        'prescripcion_imagen'    => 'Receta (archivo/correo)',
+        'proteccion'             => 'Protección',
+        'color_proteccion'       => 'Color',
+        'subproteccion'          => 'Opción adicional',
+        'color_subproteccion'    => 'Color',
+        'indice'                 => 'Índice',
+        'recubrimiento'          => 'Recubrimiento',
+    ];
+}
+
+function mmc_formatear_valor_flujo($key, $val) {
+    if ($key === 'prescripcion_valores') {
+        $partes = [];
+        if (!empty($val['nombre']))           $partes[] = 'Nombre: ' . $val['nombre'];
+        if (!empty($val['anio_nacimiento']))  $partes[] = 'Año nac.: ' . $val['anio_nacimiento'];
+        $partes[] = 'OD → SPH ' . ($val['od_sph'] ?? '—') . ' / CYL ' . ($val['od_cyl'] ?? '—') . ' / AXI ' . ($val['od_axi'] ?? '—');
+        $partes[] = 'OS → SPH ' . ($val['os_sph'] ?? '—') . ' / CYL ' . ($val['os_cyl'] ?? '—') . ' / AXI ' . ($val['os_axi'] ?? '—');
+        if (!empty($val['dos_pd'])) {
+            $partes[] = 'PD Izq: ' . ($val['pd_izq'] ?? '—') . ' | PD Der: ' . ($val['pd_der'] ?? '—');
+        } else {
+            $partes[] = 'PD: ' . ($val['pd_single'] ?? '—');
+        }
+        if (!empty($val['comentarios'])) $partes[] = 'Comentarios: ' . $val['comentarios'];
+        return implode(' | ', $partes);
+    }
+
+    if ($key === 'prescripcion_imagen') {
+        if (!empty($val['metodo']) && $val['metodo'] === 'correo') {
+            return 'El cliente enviará la receta por correo a: ' . ($val['correo_destino'] ?? '');
+        }
+        return ''; // el link del archivo se agrega aparte como meta independiente (ver más abajo)
+    }
+
+    if (isset($val['label'])) {
+        $texto = $val['label'];
+        if (!empty($val['descripcion'])) $texto .= ' — ' . wp_strip_all_tags($val['descripcion']);
+        return $texto;
+    }
+
+    return '';
+}
+
+// 3. Mostrar el resumen en la página de Carrito / Checkout
+add_filter('woocommerce_get_item_data', 'mmc_mostrar_flujo_en_carrito', 10, 2);
+function mmc_mostrar_flujo_en_carrito($item_data, $cart_item) {
+    if (empty($cart_item['mmc_flujo_lentes'])) return $item_data;
+    $labels = mmc_flujo_labels();
+
+    foreach ($cart_item['mmc_flujo_lentes'] as $key => $val) {
+        $texto = mmc_formatear_valor_flujo($key, $val);
+        if ($texto === '') continue;
+        $item_data[] = ['key' => $labels[$key] ?? ucfirst($key), 'value' => $texto];
+    }
+
+    if (!empty($cart_item['mmc_flujo_lentes']['prescripcion_imagen']['url'])) {
+        $item_data[] = ['key' => 'Archivo de receta', 'value' => $cart_item['mmc_flujo_lentes']['prescripcion_imagen']['filename'] ?? 'Ver archivo'];
+    }
+
+    return $item_data;
+}
+
+// 4. Guardar como metadatos del ítem del pedido (visible en Pedidos → detalle del admin)
+add_action('woocommerce_checkout_create_order_line_item', 'mmc_guardar_flujo_en_pedido', 10, 4);
+function mmc_guardar_flujo_en_pedido($item, $cart_item_key, $values, $order) {
+    if (empty($values['mmc_flujo_lentes'])) return;
+    $labels = mmc_flujo_labels();
+
+    foreach ($values['mmc_flujo_lentes'] as $key => $val) {
+        $texto = mmc_formatear_valor_flujo($key, $val);
+        if ($texto === '') continue;
+        $item->add_meta_data($labels[$key] ?? ucfirst($key), $texto, true);
+    }
+
+    if (!empty($values['mmc_flujo_lentes']['prescripcion_imagen']['url'])) {
+        $item->add_meta_data('Archivo de receta', $values['mmc_flujo_lentes']['prescripcion_imagen']['url'], true);
+    }
+}
+
+// 5. Convierte el link del archivo de receta en un enlace clicable dentro del admin de Pedidos
+add_filter('woocommerce_order_item_display_meta_value', 'mmc_link_receta_en_pedido', 10, 3);
+function mmc_link_receta_en_pedido($value, $meta, $item) {
+    if ($meta->key === 'Archivo de receta' && filter_var($value, FILTER_VALIDATE_URL)) {
+        return '<a href="' . esc_url($value) . '" target="_blank" rel="noopener">Ver receta subida</a>';
+    }
+    return $value;
 }
