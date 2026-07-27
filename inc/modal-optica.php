@@ -23,12 +23,14 @@ function mmc_construir_modal_optica() {
 
     // Opciones de prescripción fijas
     // Solo 2 opciones activas por ahora — descomenta las otras cuando estén listas
+    // REEMPLAZAR POR:
+    $prescripcion_cfg_correo = get_option('mmc_flujo_prescripcion', ['correo_receta' => '']);
     $opciones_prescripcion = [
         ['key' => 'online', 'titulo' => 'Completar en línea', 'desc' => 'Ingresa tu receta manualmente según tu prescripción impresa', 'icono' => 'rx-edit'],
         ['key' => 'imagen', 'titulo' => 'Subir imagen',       'desc' => 'Sube una foto de tu prescripción',                            'icono' => 'camera'],
-        // Activar desde admin cuando estén disponibles:
+        ['key' => 'correo', 'titulo' => 'Enviar por correo',  'desc' => 'Envíanos una foto de tu receta a nuestro correo',             'icono' => 'mail'],
+        // Próximamente (requiere sistema de cuentas de usuario, aún no implementado):
         // ['key' => 'guardada', 'titulo' => 'Usar receta guardada', 'desc' => 'Usa una prescripción guardada anteriormente', 'icono' => 'rx-saved'],
-        // ['key' => 'despues',  'titulo' => 'Enviar después',       'desc' => 'Puedes enviarla después del pago',            'icono' => 'mail'],
     ];
 
     $readers_values = ['+0.25','+0.50','+0.75','+1.00','+1.25','+1.50','+1.75','+2.00','+2.25','+2.50','+2.75','+3.00','+3.25','+3.50','+3.75','+4.00'];
@@ -58,27 +60,67 @@ function mmc_construir_modal_optica() {
 
             <!-- COLUMNA IZQUIERDA -->
             <div id="mmc-modal-col-izq">
+                <!-- REEMPLAZAR POR: -->
+                
+                
+                
                 <div id="mmc-resumen-producto">
-                    <img src="<?php echo esc_url($imagen_url); ?>" alt="<?php echo esc_attr($product->get_name()); ?>" id="mmc-modal-img-lente">
-                    <h3 class="mmc-modal-nombre"><?php echo esc_html($product->get_name()); ?></h3>
-                    <?php if($color_nombre): ?>
-                    <span class="mmc-modal-color"><?php echo esc_html($color_nombre); ?></span>
-                    <?php endif; ?>
+                    <div id="mmc-imagen-wrapper">
+                        <img src="<?php echo esc_url($imagen_url); ?>" alt="<?php echo esc_attr($product->get_name()); ?>" id="mmc-modal-img-lente">
+                        <div id="mmc-lente-mascara-view">
+                            <div id="mmc-lente-mascara-svg"></div>
+                        </div>
+                    </div>
                 </div>
+                
                 <div id="mmc-desglose-precio">
-                    <div class="mmc-desglose-titulo">Desglose de precio</div>
-                    <div class="mmc-desglose-row">
-                        <span>Montura</span>
+                    <div class="mmc-desglose-row mmc-desglose-row-principal">
+                        <span id="mmc-sidebar-nombre-color"><?php echo esc_html($product->get_name()); ?><?php echo $color_nombre ? ' (' . esc_html($color_nombre) . ')' : ''; ?></span>
                         <?php if($en_oferta): ?>
                         <span><del class="mmc-precio-antes"><?php echo wc_price($precio_regular); ?></del> <strong class="mmc-precio-ahora"><?php echo wc_price($precio_base); ?></strong></span>
                         <?php else: ?>
                         <strong class="mmc-precio-ahora"><?php echo wc_price($precio_base); ?></strong>
                         <?php endif; ?>
                     </div>
+
                     <div id="mmc-selecciones-resumen"></div>
+
                     <div class="mmc-desglose-row mmc-desglose-total">
-                        <span>Total</span>
+                        <span>Subtotal</span>
                         <strong id="mmc-precio-total"><?php echo wc_price($precio_base); ?></strong>
+                    </div>
+
+                    <?php
+                    $ajustes_sidebar = get_option('mmc_ajustes_sidebar', ['envio_gratis_monto' => 0, 'whatsapp_url' => '']);
+                    $envio_monto     = floatval($ajustes_sidebar['envio_gratis_monto'] ?? 0);
+                    $whatsapp_url    = $ajustes_sidebar['whatsapp_url'] ?? '';
+                    ?>
+                    <?php if ($envio_monto > 0): ?>
+                    <p class="mmc-envio-gratis-msg">Envío estándar gratis en pedidos superiores a <?php echo wc_price($envio_monto); ?></p>
+                    <?php endif; ?>
+
+                    <div class="mmc-confianza-iconos">
+                        <?php if ($whatsapp_url): ?>
+                        <a href="<?php echo esc_url($whatsapp_url); ?>" target="_blank" rel="noopener" class="mmc-confianza-item">
+                            <span class="mmc-confianza-icono"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
+                            <span class="mmc-confianza-texto"><strong>¿Necesitas ayuda?</strong><span>Iniciar un chat en vivo</span></span>
+                        </a>
+                        <?php else: ?>
+                        <div class="mmc-confianza-item mmc-confianza-disabled">
+                            <span class="mmc-confianza-icono"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
+                            <span class="mmc-confianza-texto"><strong>¿Necesitas ayuda?</strong><span>Iniciar un chat en vivo</span></span>
+                        </div>
+                        <?php endif; ?>
+
+                        <div class="mmc-confianza-item">
+                            <span class="mmc-confianza-icono"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>
+                            <span class="mmc-confianza-texto"><strong>Cambio y devolución</strong><span>en 60 días</span></span>
+                        </div>
+
+                        <div class="mmc-confianza-item">
+                            <span class="mmc-confianza-icono"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+                            <span class="mmc-confianza-texto"><strong>Garantía</strong><span>de 365 días</span></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -102,10 +144,12 @@ function mmc_construir_modal_optica() {
                             $nombre_lower  = strtolower($op['nombre']);
                             $es_cercana    = strpos($nombre_lower, 'cercana') !== false || strpos($nombre_lower, 'near') !== false;
                         ?>
+                        
                         <div class="mmc-opcion-item <?php echo $es_cercana ? 'mmc-expandible' : ''; ?>"
                              data-accion="<?php echo $es_cercana ? 'vision-cercana-expand' : 'uso'; ?>"
                              data-valor="<?php echo esc_attr($op['nombre']); ?>"
-                             data-precio="<?php echo $precio_num; ?>">
+                             data-precio="<?php echo $precio_num; ?>"
+                             data-precio-antes="<?php echo $precio_antes_num; ?>">
 
                             <?php if($tiene_badge): ?><span class="mmc-opcion-badge"><?php echo esc_html($op['badge']); ?></span><?php endif; ?>
 
@@ -181,8 +225,26 @@ function mmc_construir_modal_optica() {
         <span class="mmc-help-circle">?</span>
     </button>
 
+    
+    <div class="mmc-rx-extra-grid">
+        <div class="mmc-field">
+            <label>Nombre</label>
+            <input type="text" class="mmc-rx-select" id="rx-nombre" placeholder="Nombre completo">
+        </div>
+        <div class="mmc-field">
+            <label>Año de nacimiento</label>
+            <select class="mmc-rx-select" id="rx-anio-nacimiento"></select>
+        </div>
+    </div>
+
+    <!-- REEMPLAZAR POR: -->
+<!-- REEMPLAZAR POR ESTA TABLA ÚNICA (4x4): -->
     <div class="mmc-rx-table-wrap">
         <table class="mmc-rx-table">
+            <colgroup>
+                <col class="mmc-col-label">
+                <col class="mmc-col-data"><col class="mmc-col-data"><col class="mmc-col-data">
+            </colgroup>
             <thead>
                 <tr>
                     <th></th>
@@ -204,25 +266,25 @@ function mmc_construir_modal_optica() {
                     <td><select class="mmc-rx-select" id="rx-os-cyl"></select></td>
                     <td><select class="mmc-rx-select" id="rx-os-axi" disabled></select></td>
                 </tr>
+                <tr id="mmc-rx-pd-row">
+                    <th>PD</th>
+                    <td id="mmc-rx-pd-td2">
+                        <select class="mmc-rx-select mmc-rx-pd-single-select" id="rx-pd-single"></select>
+                        <div class="mmc-rx-pd-dual-cell" id="mmc-rx-pd-izq-cell" style="display:none;">
+                            <span class="mmc-rx-pd-sublabel">Izquierda</span>
+                            <select class="mmc-rx-select" id="rx-pd-izq"></select>
+                        </div>
+                    </td>
+                    <td id="mmc-rx-pd-td3">
+                        <div class="mmc-rx-pd-dual-cell" id="mmc-rx-pd-der-cell" style="display:none;">
+                            <span class="mmc-rx-pd-sublabel">Derecha</span>
+                            <select class="mmc-rx-select" id="rx-pd-der"></select>
+                        </div>
+                    </td>
+                    <td id="mmc-rx-pd-td4"></td>
+                </tr>
             </tbody>
         </table>
-    </div>
-
-    <div class="mmc-rx-pd-wrap">
-        <div class="mmc-rx-pd-single" id="mmc-rx-pd-single-box">
-            <label>PD</label>
-            <select class="mmc-rx-select" id="rx-pd-single"></select>
-        </div>
-        <div class="mmc-rx-pd-dual" id="mmc-rx-pd-dual-box" style="display:none;">
-            <div class="mmc-rx-pd-dual-item">
-                <label>Izquierda</label>
-                <select class="mmc-rx-select" id="rx-pd-izq"></select>
-            </div>
-            <div class="mmc-rx-pd-dual-item">
-                <label>Derecha</label>
-                <select class="mmc-rx-select" id="rx-pd-der"></select>
-            </div>
-        </div>
         <label class="mmc-rx-checkbox-label">
             <input type="checkbox" id="mmc-rx-2pd-check"> Tengo 2 números PD
         </label>
@@ -235,6 +297,64 @@ function mmc_construir_modal_optica() {
 
     <button class="mmc-btn-continuar" id="btn-rx-online-continuar">Continuar</button>
 </div>
+
+
+
+
+<!-- ===================== PANTALLA: SUBIR IMAGEN DE RECETA ===================== -->
+<div class="mmc-pantalla" id="pantalla-subir-imagen" style="display:none;">
+    <button class="mmc-btn-volver-pantalla" data-destino="prescripcion">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Atrás
+    </button>
+    <h2 class="mmc-titulo-paso">Upload image</h2>
+    <p class="mmc-subtitulo-paso">You can easily upload your prescription file in any of the following formats: PDF, JPG, GIF, PNG, JPEG</p>
+
+    <div id="mmc-rx-dropzone">
+        <input type="file" id="mmc-rx-file-input" accept=".pdf,.jpg,.jpeg,.png,.gif" hidden>
+        <div class="mmc-rx-dropzone-inner" id="mmc-rx-dropzone-inner">
+            <span class="mmc-rx-dropzone-plus">+</span>
+            <p>Drag and drop file or <u>click to upload</u></p>
+            <span class="mmc-rx-dropzone-hint">(Max Size 5 MB)</span>
+        </div>
+        <div class="mmc-rx-dropzone-preview" id="mmc-rx-dropzone-preview" style="display:none;">
+            <span id="mmc-rx-filename"></span>
+            <button type="button" id="mmc-rx-quitar-archivo">&times;</button>
+        </div>
+    </div>
+    <div class="mmc-rx-upload-status" id="mmc-rx-upload-status"></div>
+
+    <div class="mmc-rx-comentarios">
+        <label>Comentarios adicionales</label>
+        <textarea id="rx-imagen-comentarios" placeholder="Agregar un comentario..."></textarea>
+    </div>
+
+    <button class="mmc-btn-continuar" id="btn-rx-imagen-continuar" disabled>Continuar</button>
+</div>
+
+<!-- ===================== PANTALLA: ENVIAR RECETA POR CORREO ===================== -->
+<div class="mmc-pantalla" id="pantalla-correo" style="display:none;">
+    <button class="mmc-btn-volver-pantalla" data-destino="prescripcion">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Atrás
+    </button>
+    <div class="mmc-correo-box">
+        <h2 class="mmc-titulo-paso" style="text-align:center;">Envíanos tu medida por correo</h2>
+        <div class="mmc-correo-icono">
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>
+        </div>
+        <p class="mmc-correo-texto">
+            Escríbenos a <strong><?php echo esc_html($prescripcion_cfg_correo['correo_receta'] ?? 'tu-correo@dominio.com'); ?></strong> adjuntando la foto de tu medida.
+        </p>
+        <button class="mmc-btn-continuar" id="btn-rx-correo-continuar">Continuar</button>
+    </div>
+</div>
+
+
+
+
+
+
 
 <!-- ===================== MODAL: CÓMO LEER MI RECETA ===================== -->
 <div id="mmc-como-leer-overlay">
@@ -270,6 +390,31 @@ function mmc_construir_modal_optica() {
         </div>
     </div>
 </div>
+
+
+<!-- AGREGAR después de la sección de mmc-como-leer-overlay: -->
+<!-- ===================== MODAL: VER PRESCRIPCIÓN INGRESADA ===================== -->
+<div id="mmc-ver-rx-overlay">
+    <div id="mmc-ver-rx-modal">
+        <button id="mmc-ver-rx-cerrar" aria-label="Cerrar">×</button>
+        <h3>Tu receta</h3>
+        <table class="mmc-rx-table" id="mmc-ver-rx-table">
+            <thead>
+                <tr><th></th><th>Esfera (SPH)</th><th>Cilindro (CYL)</th><th>Eje (AXI)</th></tr>
+            </thead>
+            <tbody>
+                <tr><th>Derecho (OD)</th><td id="ver-rx-od-sph"></td><td id="ver-rx-od-cyl"></td><td id="ver-rx-od-axi"></td></tr>
+                <tr><th>Izquierdo (OS)</th><td id="ver-rx-os-sph"></td><td id="ver-rx-os-cyl"></td><td id="ver-rx-os-axi"></td></tr>
+            </tbody>
+        </table>
+        <div class="mmc-ver-rx-pd" id="mmc-ver-rx-pd-wrap"></div>
+        <div class="mmc-ver-rx-comentarios" id="mmc-ver-rx-comentarios" style="display:none;">
+            <strong>Comentarios:</strong>
+            <p id="mmc-ver-rx-comentarios-texto"></p>
+        </div>
+    </div>
+</div>
+
 
 
 
@@ -400,10 +545,96 @@ function mmc_construir_modal_optica() {
     <div class="mmc-paquetes-lista" id="mmc-indices-lista"></div>
 </div>
 
-                <!-- ===================== PANTALLA: RESUMEN (PASO 4) ===================== -->
+                <!-- REEMPLAZAR POR: -->
+                <!-- ===================== PANTALLA: RESUMEN FINAL (PASO 4) ===================== -->
                 <div class="mmc-pantalla" id="pantalla-paso4" style="display:none;">
-                    <h2 class="mmc-titulo-paso">Resumen de tu pedido</h2>
-                    <p class="mmc-subtitulo-paso">Este paso se configurará próximamente.</p>
+                    <button class="mmc-btn-volver-pantalla" id="btn-volver-paso4">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        Atrás
+                    </button>
+                    <h2 class="mmc-titulo-paso">Revisa tu selección</h2>
+
+                    <div class="mmc-review-box">
+
+                        <!-- FRAME -->
+                        <div class="mmc-review-row">
+                            <div class="mmc-review-icon">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M10 15h4M2 15l2-9h1M22 15l-2-9h-1"/></svg>
+                            </div>
+                            <div class="mmc-review-content">
+                                <strong class="mmc-review-titulo">Montura</strong>
+                                
+                                <span class="mmc-review-sub">
+                                    <span id="mmc-review-frame-nombre-color"><?php echo esc_html($product->get_name()); ?><?php echo $color_nombre ? ', ' . esc_html($color_nombre) : ''; ?></span>
+                                    (<?php if ($en_oferta): ?><del class="mmc-precio-antes"><?php echo wc_price($precio_regular); ?></del> <?php endif; ?><?php echo wc_price($precio_base); ?>)
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- LENS -->
+                        <div class="mmc-review-row">
+                            <div class="mmc-review-icon">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </div>
+                            <div class="mmc-review-content">
+                                <div class="mmc-review-header-row">
+                                    <strong class="mmc-review-titulo">Lente</strong>
+                                    <button type="button" class="mmc-review-edit" data-destino="uso">Editar</button>
+                                </div>
+                                <div id="mmc-review-uso-linea" class="mmc-review-uso-linea"></div>
+                                <div id="mmc-review-lentes-lista" class="mmc-review-detalle-lista"></div>
+                            </div>
+                        </div>
+
+                        <!-- CUPÓN (solo diseño, sin lógica todavía) -->
+                        <!-- REEMPLAZAR POR: -->
+                        <!-- UPGRADES (Recubrimiento) -->
+                        <div class="mmc-review-row" id="mmc-review-upgrades-row" style="display:none;">
+                            <div class="mmc-review-icon">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                            </div>
+                            <div class="mmc-review-content">
+                                <div class="mmc-review-header-row">
+                                    <strong class="mmc-review-titulo">Upgrades</strong>
+                                    <button type="button" class="mmc-review-edit" data-destino="indice">Editar</button>
+                                </div>
+                                <div id="mmc-review-upgrades-lista" class="mmc-review-detalle-lista"></div>
+                            </div>
+                        </div>
+
+                        <!-- CUPÓN (solo diseño, sin lógica todavía) -->
+                        <div class="mmc-review-cupon-row">
+                            <span class="mmc-review-cupon-label">¿Tienes un código promocional?</span>
+                            <div class="mmc-review-cupon-input-wrap">
+                                <input type="text" id="mmc-review-cupon-input" placeholder="Código">
+                                <button type="button" id="mmc-review-cupon-btn" disabled>Aplicar</button>
+                            </div>
+                        </div>
+
+                        <!-- TOTAL -->
+                        <div class="mmc-review-total-wrap">
+                            <div class="mmc-review-ahorro-linea" id="mmc-review-ahorro-linea" style="display:none;"></div>
+                            <div class="mmc-review-total-row">
+                                <span>Total</span>
+                                <span class="mmc-review-total-precios">
+                                    <del id="mmc-review-precio-regular" style="display:none;"></del>
+                                    <strong id="mmc-review-precio-final"></strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- BOTONES -->
+                        <div class="mmc-review-botones">
+                            <button type="button" id="mmc-btn-add-to-cart" class="mmc-btn-review-outline">Añadir al carrito</button>
+                            <button type="button" id="mmc-btn-buy-now" class="mmc-btn-review-solido">Comprar ahora</button>
+                        </div>
+
+                        <!-- CONFIANZA -->
+                        <div class="mmc-review-confianza">
+                            <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Garantía de devolución 100%</span>
+                            <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="7" width="15" height="10" rx="1"/><path d="M16 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg> Envío y devoluciones gratis</span>
+                        </div>
+                    </div>
                 </div>
 
 
@@ -433,7 +664,15 @@ var mmcProtecciones = <?php
     }
     echo json_encode($protecciones_data);
 ?>;
+// REEMPLAZAR POR:
 var mmcRecubrimientos = <?php echo json_encode(get_option('mmc_recubrimientos', [])); ?>;
+var mmcPrecioRegular   = <?php echo json_encode($precio_regular); ?>;
+// REEMPLAZAR POR:
+var mmcCheckoutUrl     = <?php echo json_encode( function_exists('wc_get_checkout_url') ? wc_get_checkout_url() : '' ); ?>;
+// REEMPLAZAR POR:
+// REEMPLAZAR POR:
+var mmcMascaraLunaUrl  = <?php echo json_encode( $ajustes_sidebar['mascara_luna_url'] ?? '' ); ?>;
+var mmcProductoNombre  = <?php echo json_encode( $product->get_name() ); ?>;
         var mmcTiposLente = <?php echo json_encode(get_option('mmc_tipos_lente', [])); ?>;
     </script>
     <?php
